@@ -6,25 +6,36 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.uavscoutproject.R
+import com.example.uavscoutproject.mainscreen.home.newsapi.ArticleComposer
 import com.example.uavscoutproject.mainscreen.location.data.GeocodeItem
 import com.example.uavscoutproject.mainscreen.location.data.Position
+import com.example.uavscoutproject.mainscreen.location.locationapi.AirSpaceApiService
 import com.example.uavscoutproject.mainscreen.location.locationapi.GeocodeApiService
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
 import kotlinx.coroutines.launch
+import okhttp3.ResponseBody
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 class LocationViewModel : ViewModel() {
-    val locationDataList = mutableStateListOf<GeocodeItem>()
-    val alterLocationList = mutableStateListOf<GeocodeItem>(GeocodeItem("", Position(0.0,0.0)))
-    val addressSuggestions = mutableStateListOf<GeocodeItem>()
-    val retrofit: Retrofit = Retrofit.Builder()
-            .baseUrl("https://geocode.search.hereapi.com/v1/")
-            .addConverterFactory(GsonConverterFactory.create())
+        val locationDataList = mutableStateListOf<GeocodeItem>()
+        val alterLocationList = mutableStateListOf<GeocodeItem>(GeocodeItem("", Position(0.0,0.0)))
+        val addressSuggestions = mutableStateListOf<GeocodeItem>()
+        val locationretrofit: Retrofit = Retrofit.Builder()
+                .baseUrl("https://geocode.search.hereapi.com/v1/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()
+        val airspaceretrofit = Retrofit.Builder()
+            .baseUrl("https://api.airmap.com/")
+            .addConverterFactory(GsonConverterFactory.create()) // Si deseas usar Gson como convertidor
             .build()
 
-        val geocodeApiService = retrofit.create(GeocodeApiService::class.java)
+        val airMapApi = airspaceretrofit.create(AirSpaceApiService::class.java)
+        val geocodeApiService = locationretrofit.create(GeocodeApiService::class.java)
 
         private lateinit var firestore: FirebaseFirestore
 
@@ -48,10 +59,40 @@ class LocationViewModel : ViewModel() {
                 Log.d("Firebase", "Save failed $it ")
             }
         }
+        fun requestAirSpace(context: Context){
+            val geometry = "{\"type\":\"Point\",\"coordinates\":[-118.6578369140625,34.11180455556899]}"
+            val buffer = 1
+            val types = "airport,controlled_airspace,tfr,wildfire"
+            val full = true
+            val geometryFormat = "geojson"
+            val apiKey = context.getString(R.string.airmap_api_key)
+            viewModelScope.launch {
+                try {
+                    val response = airMapApi.searchAirSpace(
+                        geometry,
+                        buffer,
+                        types,
+                        full,
+                        geometryFormat,
+                        apiKey
+                    )
+                    if (response.isSuccessful) {
+                        Log.d("AirSpace", "Ha entrado bien : ${response.body()}")
+                        for(item in response.body()?.data!!){
+                            Log.d("AirSpace", "Ha entrado bien : ${item.id}")
+                        }
 
+                    } else {
+                        Log.d("API_ERROR", "Error: ${response.code()} + ${response.raw()}")
+                    }
+                } catch (e: Exception) {
+                    // Maneja cualquier error en la llamada a la API
+                    e.printStackTrace()
+                }
+            }
+        }
         fun setLocationSuggestion(context : Context, query:String = "") {
             viewModelScope.launch {
-                val query = query
                 val apiKey = context.getString(R.string.here_api_key)
                 try {
                     addressSuggestions.clear()

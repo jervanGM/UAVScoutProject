@@ -31,6 +31,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -350,10 +351,52 @@ fun WeatherDialog(
     }
 
 }
-/*@Preview(showBackground = true, showSystemUi = true)
+
+@Composable
+fun AdvisorDialog(
+    onDismiss: () -> Unit,
+){
+    val grayColorSemiTransparent = Color.LightGray.copy(0.6f)
+    Dialog(properties = DialogProperties(usePlatformDefaultWidth = false),
+        onDismissRequest = onDismiss) {
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight().scale(0.9f),
+            shape = RoundedCornerShape(70.dp),
+            color = Color.White
+        ) {
+            Column(modifier = Modifier.padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally) {
+
+                Row(horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(vertical = 4.dp)) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_route),
+                        modifier = Modifier
+                            .size(24.dp),
+                        contentDescription = null
+                    )
+                }
+
+                Text(text = "Considera iso um aviso",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 50.dp)
+                        .background(grayColorSemiTransparent,shape = RoundedCornerShape(16.dp)),
+                    fontSize = 17.sp,
+                    textAlign = TextAlign.Center,
+                    color = Color(android.graphics.Color.parseColor("#F24726"))
+                )
+            }
+        }
+    }
+
+}
+
+@Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun DialogPreview(){
-    WeatherDialog({
-
-    }, it = 0, hourlydata)
-}*/
+    AdvisorDialog(onDismiss = {})
+}

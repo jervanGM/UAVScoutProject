@@ -112,8 +112,6 @@ fun DronesSection(
     val EDIT = true
     val NOTEDIT = false
     val FALSEINDEX = 0
-    val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
     Column(Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp)) {
         Row(
             Modifier
@@ -151,7 +149,6 @@ fun DronesSection(
                         localMode = DroneViewModel.LocalMode.DELETE,
                         localIndex = droneViewModel.getItem(removedIndex))
                     droneViewModel.deleteDrone(removedIndex)
-
                 }
             )
         }

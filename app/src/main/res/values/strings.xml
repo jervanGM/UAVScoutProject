@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">UAVScout Project</string>
     <string name="prefs_file">com.example.uavscoutproject.PREFERENCE_FILE_KEY</string>
-    <string name="airmap_api_key">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjcmVkZW50aWFsX2lkIjoiY3JlZGVudGlhbHxSZ1lKREdrVHliN2drOGlCUU9wZGRzdjB2M3E5IiwiYXBwbGljYXRpb25faWQiOiJhcHBsaWNhdGlvbnxEMFJMZzd6SDlBZVIzS2g0Tjc0bzJzYk5ZbG9sIiwib3JnYW5pemF0aW9uX2lkIjoiZGV2ZWxvcGVyfFd4QWF6MnBDbXF6WEVrSHdBUUpZelRBWWdnZEwiLCJpYXQiOjE2ODM2NDk5OTF9.M1PYXffVtMz6C-bCGedtuQ4-2tsE6GihjZ_F4sVk7w0</string>
+    <string name="airmap_api_key">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjcmVkZW50aWFsX2lkIjoiY3JlZGVudGlhbHxZb0pCTUpCdXc2bjdKUXQ0MlFvblF1b3ZrNW82IiwiYXBwbGljYXRpb25faWQiOiJhcHBsaWNhdGlvbnxaOGxYZVhRc0VZUTk3TXUzQnBBb1J0NDdXQVprIiwib3JnYW5pemF0aW9uX2lkIjoiZGV2ZWxvcGVyfFd4QWF6MnBDbXF6WEVrSHdBUUpZelRBWWdnZEwiLCJpYXQiOjE2ODUzMTM1ODF9.qDdFcL0_pBVn7AZnPlja0UW6TUrLAfHlenW81b-ZFAo</string>
     <string name="news_api_key">c56d6f5071ae4760b339c11944e4be08</string>
     <string name="sample_description">¡Hola a todos! Soy un apasionado de los drones y me encanta explorar nuevos lugares y perspectivas con mi drone. Me emociona cada vez que
         planifico un nuevo vuelo y capturo imágenes impresionantes desde el aire. Me encanta experimentar con diferentes técnicas de fotografía y videografía para obtener imágenes

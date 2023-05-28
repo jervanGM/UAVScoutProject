@@ -4,7 +4,12 @@ package com.example.uavscoutproject.materials
 
 import android.graphics.Color
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.graphics.ColorUtils
 import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.annotations.Marker
 import com.mapbox.mapboxsdk.annotations.MarkerOptions
@@ -24,7 +29,7 @@ import com.mapbox.mapboxsdk.maps.MapboxMap
  */
 @Composable
 fun MapView() {
-    var cambio = false
+    var show by remember { mutableStateOf(false) }
     val polygon: MutableList<LatLng> = ArrayList()
     polygon.add(LatLng(45.522585, -122.685699))
     polygon.add(LatLng(45.534611, -122.708873))
@@ -66,19 +71,13 @@ fun MapView() {
                     var polygonl =map.addPolygon(
                         PolygonOptions()
                         .addAll(polygon)
-                        .fillColor(Color.parseColor("#CD0000")))
+                        .fillColor(ColorUtils.setAlphaComponent(
+                            Color.parseColor("#F27E7E"),
+                            (0.5f * 255).toInt())))
 
                     map.setOnPolygonClickListener { clickedPolygon ->
                         if (clickedPolygon == polygonl) {
-                            cambio = !cambio
-                            if (cambio) {
-                                map.addMarker(
-                                    MarkerOptions()
-                                        .position(LatLng(45.522585, -122.685699))
-                                        .setTitle("Zona restringida")
-                                        .setSnippet("Espero que ardas en el infierno boludo")
-                                )
-                            }
+                            show = true
                         }
                     }
                 }
@@ -86,4 +85,7 @@ fun MapView() {
             mapView
         }
     )
+    if(show){
+        AdvisorDialog( onDismiss = {show = false})
+    }
 }

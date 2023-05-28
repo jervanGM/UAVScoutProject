@@ -54,6 +54,7 @@ fun LocationView(locationViewModel: LocationViewModel = viewModel()) {
     val itemsList = locationViewModel.alterLocationList
     val scrollState = rememberLazyListState()
     val context = LocalContext.current
+    locationViewModel.requestAirSpace(context)
     Column {
        Box(
            Modifier

@@ -45,6 +45,7 @@ android {
     packagingOptions {
         resources {
             excludes += '/META-INF/{AL2.0,LGPL2.1}'
+            exclude 'google/protobuf/empty.proto'
         }
     }
 }
@@ -78,7 +79,6 @@ dependencies {
     implementation 'com.google.android.material:material:1.4.0'
     implementation 'androidx.paging:paging-common-ktx:3.1.1'
     implementation 'com.google.firebase:firebase-auth-ktx:22.0.0'
-    implementation 'com.facebook.android:facebook-android-sdk:[4,5)'
     implementation 'com.google.android.gms:play-services-auth:20.5.0'
     implementation 'com.google.firebase:firebase-core:9.6.1'
     testImplementation 'junit:junit:4.13.2'
@@ -89,7 +89,7 @@ dependencies {
     debugImplementation 'androidx.compose.ui:ui-tooling'
     debugImplementation 'androidx.compose.ui:ui-test-manifest'
     implementation "androidx.compose.runtime:runtime-livedata:1.4.3"
-
+    //implementation 'com.github.airmap:AirMapSDK-Android:v3.0.0'
     implementation "androidx.room:room-runtime:2.5.1"
     implementation "androidx.room:room-ktx:2.5.1"
     annotationProcessor "androidx.room:room-compiler:2.5.1"
