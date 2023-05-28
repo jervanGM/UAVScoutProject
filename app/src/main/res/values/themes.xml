@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Tema para modo claro -->
+    <style name="Theme.UAVScoutProject" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <!-- Personalizar atributos del tema para modo claro -->
+    </style>
+
+    <!-- Tema para modo oscuro -->
+    <style name="Theme.UAVScoutProject.Dark" parent="Theme.MaterialComponents.DayNight.DarkActionBar" tools:ignore="DuplicateDefinition">
+        <!-- Personalizar atributos del tema para modo oscuro -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryVariant">@color/colorPrimaryVariant</item>
+        <item name="colorOnPrimary">@color/colorOnPrimary</item>
+        <item name="colorSecondary">@color/colorSecondary</item>
+        <item name="colorSecondaryVariant">@color/colorSecondaryVariant</item>
+        <item name="colorOnSecondary">@color/colorOnSecondary</item>
+    </style>
+</resources>
+

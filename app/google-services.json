@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "457141996739",
+    "project_id": "uavscout-2024",
+    "storage_bucket": "uavscout-2024.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:457141996739:android:385c20916723306d85a676",
+        "android_client_info": {
+          "package_name": "com.example.uavscoutproject"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "457141996739-0tquiuihoq8vcbnb4dvl6icbmpq276h5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.uavscoutproject",
+            "certificate_hash": "5b4b68ee3b61f3b9c654eb810f49e8a2e67a2866"
+          }
+        },
+        {
+          "client_id": "457141996739-t1pvj8ltiepl4bksil8l4obnpl26qu2a.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBjH5xfhFRhB361RWeHdvnnTigb-PdLoFk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "457141996739-t1pvj8ltiepl4bksil8l4obnpl26qu2a.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
