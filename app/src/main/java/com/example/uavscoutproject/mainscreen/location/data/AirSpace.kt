@@ -1,5 +1,7 @@
 package com.example.uavscoutproject.mainscreen.location.data
 
+import kotlin.reflect.jvm.internal.impl.load.kotlin.JvmType
+
 
 data class AirSpaceResponse(
     val status: String,
@@ -8,7 +10,6 @@ data class AirSpaceResponse(
 
 data class AirSpace(
     val id: String,
-    val airspace_uuid: String,
     val latitude: Double,
     val longitude: Double,
     val min_circle_radius: Double,
@@ -33,10 +34,25 @@ data class AirSpaceProperties(
 
 data class AirSpaceGeometry(
     val type: String,
-    val coordinates: List<AirSpacePosition>
+    val coordinates: List<List<List<Double>>>
 )
 
 data class AirSpacePosition(
     val lat: Double,
     val lng: Double
 )
+fun List<List<List<Double>>>.toPositionList(): List<AirSpacePosition> {
+    val positionList = mutableListOf<AirSpacePosition>()
+
+    for (coordinateList in this) {
+        for (coordinate in coordinateList) {
+            val longitude = coordinate[0]
+            val latitude = coordinate[1]
+
+            val position = AirSpacePosition(latitude, longitude)
+            positionList.add(position)
+        }
+    }
+
+    return positionList
+}

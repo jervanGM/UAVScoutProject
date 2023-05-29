@@ -8,16 +8,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.graphics.ColorUtils
+import com.example.uavscoutproject.mainscreen.location.data.AirSpace
 import com.mapbox.mapboxsdk.Mapbox
-import com.mapbox.mapboxsdk.annotations.Marker
 import com.mapbox.mapboxsdk.annotations.MarkerOptions
 import com.mapbox.mapboxsdk.annotations.PolygonOptions
 import com.mapbox.mapboxsdk.camera.CameraPosition
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.maps.MapView
-import com.mapbox.mapboxsdk.maps.MapboxMap
 
 
 /**
@@ -28,7 +28,7 @@ import com.mapbox.mapboxsdk.maps.MapboxMap
  * @param onLoad This will get called once the map has been loaded.
  */
 @Composable
-fun MapView() {
+fun MapView(airspaceDataList: SnapshotStateList<AirSpace>) {
     var show by remember { mutableStateOf(false) }
     val polygon: MutableList<LatLng> = ArrayList()
     polygon.add(LatLng(45.522585, -122.685699))

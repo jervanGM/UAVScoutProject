@@ -61,7 +61,7 @@ fun LocationView(locationViewModel: LocationViewModel = viewModel()) {
                .fillMaxWidth()
                .weight(1.5f)
         ) {
-            MapView()
+            MapView(locationViewModel.airspaceDataList)
         }
         Box(
             Modifier

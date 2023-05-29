@@ -7,8 +7,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.uavscoutproject.R
 import com.example.uavscoutproject.mainscreen.home.newsapi.ArticleComposer
+import com.example.uavscoutproject.mainscreen.location.data.AirSpace
 import com.example.uavscoutproject.mainscreen.location.data.GeocodeItem
 import com.example.uavscoutproject.mainscreen.location.data.Position
+import com.example.uavscoutproject.mainscreen.location.data.toPositionList
 import com.example.uavscoutproject.mainscreen.location.locationapi.AirSpaceApiService
 import com.example.uavscoutproject.mainscreen.location.locationapi.GeocodeApiService
 import com.google.firebase.firestore.FirebaseFirestore
@@ -25,6 +27,7 @@ class LocationViewModel : ViewModel() {
         val locationDataList = mutableStateListOf<GeocodeItem>()
         val alterLocationList = mutableStateListOf<GeocodeItem>(GeocodeItem("", Position(0.0,0.0)))
         val addressSuggestions = mutableStateListOf<GeocodeItem>()
+        val airspaceDataList = mutableStateListOf<AirSpace>()
         val locationretrofit: Retrofit = Retrofit.Builder()
                 .baseUrl("https://geocode.search.hereapi.com/v1/")
                 .addConverterFactory(GsonConverterFactory.create())
@@ -61,7 +64,7 @@ class LocationViewModel : ViewModel() {
         }
         fun requestAirSpace(context: Context){
             val geometry = "{\"type\":\"Point\",\"coordinates\":[-118.6578369140625,34.11180455556899]}"
-            val buffer = 1
+            val buffer = 10000
             val types = "airport,controlled_airspace,tfr,wildfire"
             val full = true
             val geometryFormat = "geojson"
@@ -77,10 +80,8 @@ class LocationViewModel : ViewModel() {
                         apiKey
                     )
                     if (response.isSuccessful) {
-                        Log.d("AirSpace", "Ha entrado bien : ${response.body()}")
-                        for(item in response.body()?.data!!){
-                            Log.d("AirSpace", "Ha entrado bien : ${item.id}")
-                        }
+                        Log.d("AirSpace", "Ha entrado bien : ${response.body()?.status }")
+                        airspaceDataList.addAll(response.body()?.data!!)
 
                     } else {
                         Log.d("API_ERROR", "Error: ${response.code()} + ${response.raw()}")
