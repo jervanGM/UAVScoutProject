@@ -1,5 +1,8 @@
 package com.example.uavscoutproject.mainscreen.location.data
 
+import android.util.Log
+import com.mapbox.mapboxsdk.geometry.LatLng
+import java.text.DecimalFormat
 import kotlin.reflect.jvm.internal.impl.load.kotlin.JvmType
 
 
@@ -41,18 +44,16 @@ data class AirSpacePosition(
     val lat: Double,
     val lng: Double
 )
-fun List<List<List<Double>>>.toPositionList(): List<AirSpacePosition> {
-    val positionList = mutableListOf<AirSpacePosition>()
+fun List<List<List<Double>>>.toPolygon(): MutableList<LatLng> {
+    val polygons: MutableList<LatLng> = mutableListOf()
 
     for (coordinateList in this) {
         for (coordinate in coordinateList) {
             val longitude = coordinate[0]
             val latitude = coordinate[1]
-
-            val position = AirSpacePosition(latitude, longitude)
-            positionList.add(position)
+            polygons.add(LatLng(latitude, longitude))
         }
     }
 
-    return positionList
+    return polygons
 }

@@ -1,7 +1,6 @@
 package com.example.uavscoutproject.mainscreen.home
 
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -20,7 +19,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -64,14 +62,13 @@ import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.example.uavscoutproject.R
-import com.example.uavscoutproject.mainscreen.location.LocationViewModel
+import com.example.uavscoutproject.mainscreen.location.viewmodel.LocationViewModel
 import com.example.uavscoutproject.mainscreen.home.data.Article
 import com.example.uavscoutproject.mainscreen.home.data.Dronedata
 import com.example.uavscoutproject.mainscreen.home.droneviewmodel.DroneViewModel
 import com.example.uavscoutproject.mainscreen.home.newsapi.ArticleComposer
 import com.example.uavscoutproject.materials.DroneDialog
 import com.example.uavscoutproject.navigation.AppScreens
-import kotlinx.coroutines.launch
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter

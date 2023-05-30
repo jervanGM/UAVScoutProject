@@ -18,5 +18,5 @@ interface AirSpaceApiService {
         @Query("full") full: Boolean,
         @Query("geometry_format") geometryFormat: String,
         @Header("X-API-Key") apiKey: String
-    ): retrofit2.Response<AirSpaceResponse>
+    ): AirSpaceResponse
 }

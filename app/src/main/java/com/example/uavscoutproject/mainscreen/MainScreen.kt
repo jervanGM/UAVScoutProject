@@ -46,7 +46,7 @@ import com.example.uavscoutproject.R
 import com.example.uavscoutproject.mainscreen.home.HomeView
 import com.example.uavscoutproject.mainscreen.home.droneviewmodel.DroneViewModel
 import com.example.uavscoutproject.mainscreen.location.LocationView
-import com.example.uavscoutproject.mainscreen.location.LocationViewModel
+import com.example.uavscoutproject.mainscreen.location.viewmodel.LocationViewModel
 import com.example.uavscoutproject.navigation.DrawerBody
 import com.example.uavscoutproject.navigation.DrawerHeader
 import com.example.uavscoutproject.navigation.Menuitem

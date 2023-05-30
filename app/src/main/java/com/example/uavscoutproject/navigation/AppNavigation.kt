@@ -15,7 +15,7 @@ import com.example.uavscoutproject.authentication.RegisterScreen
 import com.example.uavscoutproject.mainscreen.home.DroneMakingScreen
 import com.example.uavscoutproject.mainscreen.home.NewsScreen
 import com.example.uavscoutproject.mainscreen.home.droneviewmodel.DroneViewModel
-import com.example.uavscoutproject.mainscreen.location.LocationViewModel
+import com.example.uavscoutproject.mainscreen.location.viewmodel.LocationViewModel
 
 
 @Composable

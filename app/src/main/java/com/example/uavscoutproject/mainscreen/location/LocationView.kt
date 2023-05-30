@@ -47,6 +47,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.uavscoutproject.R
 import com.example.uavscoutproject.mainscreen.location.data.GeocodeItem
 import com.example.uavscoutproject.mainscreen.location.data.Position
+import com.example.uavscoutproject.mainscreen.location.viewmodel.LocationViewModel
 import com.example.uavscoutproject.materials.MapView
 
 @Composable
@@ -54,14 +55,13 @@ fun LocationView(locationViewModel: LocationViewModel = viewModel()) {
     val itemsList = locationViewModel.alterLocationList
     val scrollState = rememberLazyListState()
     val context = LocalContext.current
-    locationViewModel.requestAirSpace(context)
     Column {
        Box(
            Modifier
                .fillMaxWidth()
                .weight(1.5f)
         ) {
-            MapView(locationViewModel.airspaceDataList)
+            MapView(locationViewModel)
         }
         Box(
             Modifier

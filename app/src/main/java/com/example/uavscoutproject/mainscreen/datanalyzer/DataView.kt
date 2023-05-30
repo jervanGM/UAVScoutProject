@@ -48,16 +48,15 @@ import com.example.uavscoutproject.mainscreen.datanalyzer.viewmodel.DataViewMode
 import com.example.uavscoutproject.mainscreen.home.TableCell
 import com.example.uavscoutproject.mainscreen.home.data.Dronedata
 import com.example.uavscoutproject.mainscreen.home.droneviewmodel.DroneViewModel
-import com.example.uavscoutproject.mainscreen.location.LocationViewModel
-import com.example.uavscoutproject.mainscreen.location.data.GeocodeItem
+import com.example.uavscoutproject.mainscreen.location.viewmodel.LocationViewModel
 import com.example.uavscoutproject.materials.WeatherDialog
 import kotlinx.coroutines.delay
 
 
 @Composable
 fun DataView(dataViewModel: DataViewModel = viewModel(),
-            locationViewModel : LocationViewModel = viewModel(),
-            droneViewModel: DroneViewModel = viewModel()) {
+             locationViewModel : LocationViewModel = viewModel(),
+             droneViewModel: DroneViewModel = viewModel()) {
     var show by remember { mutableStateOf(false) }
     var showindex by remember { mutableStateOf(0) }
     var selectedOption by remember { mutableStateOf("Hoy") }
