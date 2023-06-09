@@ -89,10 +89,13 @@ dependencies {
     debugImplementation 'androidx.compose.ui:ui-tooling'
     debugImplementation 'androidx.compose.ui:ui-test-manifest'
     implementation "androidx.compose.runtime:runtime-livedata:1.4.3"
-    //implementation 'com.github.airmap:AirMapSDK-Android:v3.0.0'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0'
+    //implementation 'com.github.osmdroid:osmdroid:6.1.6.2'
+    implementation 'com.github.MKergall:osmbonuspack:6.9.0'
     implementation "androidx.room:room-runtime:2.5.1"
     implementation "androidx.room:room-ktx:2.5.1"
     annotationProcessor "androidx.room:room-compiler:2.5.1"
+    //implementation 'ovh.plrapps:mapcompose:2.7.1'
     // To use Kotlin annotation processing tool (kapt)
     kapt "androidx.room:room-compiler:2.5.1"
 

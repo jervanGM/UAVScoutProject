@@ -10,6 +10,6 @@ data class GeocodeItem(
 )
 
 data class Position(
-    val lat: Double,
-    val lng: Double
+    val lat: Double?,
+    val lng: Double?
 )

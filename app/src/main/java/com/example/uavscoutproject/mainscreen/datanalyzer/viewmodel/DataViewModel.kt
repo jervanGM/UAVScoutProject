@@ -7,8 +7,6 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.util.Log
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -37,8 +35,8 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
     private val _presionState: MutableLiveData<Float> = MutableLiveData(0f)
     private val _iluminacionState: MutableLiveData<Float> = MutableLiveData(0f)
 
-    var firstlocation = GeocodeItem("", Position(0.0,0.0))
-    var lastlocation = GeocodeItem("", Position(0.0,0.0))
+    var firstlocation = GeocodeItem("", Position(null,null))
+    var lastlocation = GeocodeItem("", Position(null,null))
     val retrofit: Retrofit = Retrofit.Builder()
         .baseUrl("https://api.open-meteo.com/v1/")
         .addConverterFactory(GsonConverterFactory.create())
@@ -104,8 +102,8 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
                         val longitude = location.position.lng
                         val response =
                             weatherApiService.weather(
-                                latitude,
-                                longitude,
+                                latitude!!,
+                                longitude!!,
                                 hourlyFields,
                                 forecastDays
                             )
@@ -234,8 +232,6 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         val isoFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
 
         // Obtener la fecha en formato ISO-8601
-        val isoDate: String = isoFormat.format(currentDate.time)
-        Log.d("Calendario", "${isoDate}")
         val dayOfWeekFormat = SimpleDateFormat("EEEE", Locale.getDefault()).format(currentDate.time)
         val dayOfMonthFormat = SimpleDateFormat("d", Locale.getDefault()).format(currentDate.time)
         return mapOf(

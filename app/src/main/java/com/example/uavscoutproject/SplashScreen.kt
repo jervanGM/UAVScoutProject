@@ -23,19 +23,23 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.uavscoutproject.authentication.AuthenticationScreenViewModel
-import com.example.uavscoutproject.mainscreen.home.data.Article
 import com.example.uavscoutproject.mainscreen.home.droneviewmodel.DroneViewModel
 import com.example.uavscoutproject.mainscreen.home.newsapi.ArticleComposer
 import com.example.uavscoutproject.mainscreen.home.newsapi.RetrofitClient
+import com.example.uavscoutproject.mainscreen.location.viewmodel.LocationViewModel
 import com.example.uavscoutproject.navigation.AppScreens
 
 @Composable
-fun SplashScreen(navController: NavHostController,
-                 authenticationviewModel: AuthenticationScreenViewModel = viewModel(),
-                 droneViewModel: DroneViewModel = viewModel()) {
+fun SplashScreen(
+    navController: NavHostController,
+    authenticationviewModel: AuthenticationScreenViewModel = viewModel(),
+    droneViewModel: DroneViewModel = viewModel(),
+    locationViewModel: LocationViewModel
+) {
     val context = LocalContext.current
     LaunchedEffect(key1 = true) { //Temporal, si es necesario realizar tareas en segundo plano se debe editar
         droneViewModel.getDroneData()
+        locationViewModel.getAirSpacesFromDB()
         newsDroneApi(context)
         val navigate = if(authenticationviewModel.isLoggedIn())
                         {

@@ -28,7 +28,7 @@ fun AppNavigation() {
             navController = navController,
             startDestination = AppScreens.SplashScreen.route){
         composable(AppScreens.SplashScreen.route){
-            SplashScreen(navController, droneViewModel = droneViewModel)
+            SplashScreen(navController, droneViewModel = droneViewModel, locationViewModel = locationViewModel)
         }
         composable(route = AppScreens.MainScreen.route){
             MainScreen(navController, droneViewModel,locationViewModel)

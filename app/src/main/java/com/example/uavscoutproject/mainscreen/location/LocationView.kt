@@ -50,18 +50,25 @@ import com.example.uavscoutproject.mainscreen.location.data.Position
 import com.example.uavscoutproject.mainscreen.location.viewmodel.LocationViewModel
 import com.example.uavscoutproject.materials.MapView
 
+enum class MarkerState {
+    NO_MARK,
+    MARK,
+    STABLISH_MARK
+}
 @Composable
 fun LocationView(locationViewModel: LocationViewModel = viewModel()) {
     val itemsList = locationViewModel.alterLocationList
     val scrollState = rememberLazyListState()
     val context = LocalContext.current
+    var markerState = remember { mutableStateOf(MarkerState.NO_MARK) }
+
     Column {
        Box(
            Modifier
                .fillMaxWidth()
                .weight(1.5f)
         ) {
-            MapView(locationViewModel)
+            MapView(modifier = Modifier, isMarkerSet = markerState,locationViewModel)
         }
         Box(
             Modifier
@@ -70,7 +77,21 @@ fun LocationView(locationViewModel: LocationViewModel = viewModel()) {
                 .padding(vertical = 4.dp)
         ) {
             Column {
-                GeobuttonsRow(locationViewModel)
+                GeobuttonsRow(locationViewModel, onMarkerChange = {
+                    when (markerState.value) {
+                        MarkerState.NO_MARK -> {
+                            markerState.value = MarkerState.MARK
+                        }
+                        MarkerState.MARK -> {
+                            markerState.value = MarkerState.STABLISH_MARK
+                        }
+                        MarkerState.STABLISH_MARK -> {
+                            markerState.value = MarkerState.NO_MARK
+                        }
+                    }
+
+                }
+                )
                 Box(
                     Modifier
                         .fillMaxWidth()
@@ -95,7 +116,7 @@ fun LocationView(locationViewModel: LocationViewModel = viewModel()) {
                             item = itemsList.get(index),
                             onItemChanged = { i, s -> itemsList[i] = s },
                             onItemRemoved = { i -> itemsList.removeAt(i) },
-                            onItemAdded = { itemsList.add(GeocodeItem("", Position(0.0,0.0))) },
+                            onItemAdded = { itemsList.add(GeocodeItem("", Position(null,null))) },
                             canDelete = (itemsList.size > 1),
                             context,
                             locationViewModel = locationViewModel
@@ -117,13 +138,15 @@ fun LocationPreview(){
 }
 
 @Composable
-fun GeobuttonsRow(locationViewModel: LocationViewModel) {
+fun GeobuttonsRow(
+    locationViewModel: LocationViewModel,
+    onMarkerChange: () -> Unit) {
     Row(horizontalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier.padding(top = 8.dp)) {
         Box(
             modifier = Modifier
                 .weight(0.3f)
-                .clickable(onClick = { /* acción al hacer clic */ }),
+                .clickable(onClick = { onMarkerChange() }),
             contentAlignment = Alignment.Center
         ) {
             Row(
@@ -251,7 +274,7 @@ fun LocationItem(
             LocationAutocomplete(
                 searchText = item.title,
                 onSearchTextChanged = { newValue ->
-                    onItemChanged(index, GeocodeItem(newValue,Position(0.0,0.0)))
+                    onItemChanged(index, GeocodeItem(newValue,Position(null,null)))
                 },
                 onAddressSelected = { suggestion ->
                     onItemChanged(
@@ -261,6 +284,8 @@ fun LocationItem(
                             Position(suggestion.position.lat,suggestion.position.lng)
                         )
                     )
+                    locationViewModel.requestAirSpace(context, suggestion)
+
                 },
                 modifier = Modifier.weight(1.5f),
                 context = context,

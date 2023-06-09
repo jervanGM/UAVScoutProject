@@ -11,12 +11,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
@@ -31,7 +35,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -45,6 +48,8 @@ import com.example.uavscoutproject.mainscreen.datanalyzer.data.HourlyData
 import com.example.uavscoutproject.mainscreen.home.data.Dronedata
 import com.example.uavscoutproject.mainscreen.home.TableCell
 import com.example.uavscoutproject.mainscreen.home.loadBitmapFromUri
+import com.example.uavscoutproject.mainscreen.location.data.AirSpace
+import com.example.uavscoutproject.mainscreen.location.viewmodel.LocationViewModel
 
 @Composable
 fun DroneDialog(dronedata: Dronedata, onDismiss: () -> Unit){
@@ -100,7 +105,12 @@ fun DroneDialog(dronedata: Dronedata, onDismiss: () -> Unit){
                                     contentScale = ContentScale.Crop,
                                     modifier = Modifier
                                         .size(120.dp)
-                                        .padding(start = 8.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
+                                        .padding(
+                                            start = 8.dp,
+                                            end = 16.dp,
+                                            top = 8.dp,
+                                            bottom = 8.dp
+                                        )
                                         .clip(shape = RectangleShape)
                                         .border(
                                             width = 2.dp,
@@ -118,7 +128,12 @@ fun DroneDialog(dronedata: Dronedata, onDismiss: () -> Unit){
                                     contentScale = ContentScale.Crop,
                                     modifier = Modifier
                                         .size(120.dp)
-                                        .padding(start = 8.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
+                                        .padding(
+                                            start = 8.dp,
+                                            end = 16.dp,
+                                            top = 8.dp,
+                                            bottom = 8.dp
+                                        )
                                         .clip(shape = RectangleShape)
                                         .border(
                                             width = 2.dp,
@@ -243,7 +258,8 @@ fun WeatherDialog(
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .wrapContentHeight().scale(0.9f),
+                .wrapContentHeight()
+                .scale(0.9f),
             shape = RoundedCornerShape(70.dp),
             color = Color(evaluation.first)
         ) {
@@ -252,8 +268,9 @@ fun WeatherDialog(
 
                 Row(verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceEvenly,
-                    modifier = Modifier.fillMaxWidth(0.7f)
-                                       .padding(top = 16.dp)){
+                    modifier = Modifier
+                        .fillMaxWidth(0.7f)
+                        .padding(top = 16.dp)){
                     Icon(
                         painter = painterResource(data.getWeatherIcon(index)),
                         modifier = Modifier
@@ -289,9 +306,12 @@ fun WeatherDialog(
                     )
                 }
                 Column(
-                    Modifier.fillMaxWidth(0.92f)
-                        .background(grayColorSemiTransparent,
-                            shape = RoundedCornerShape(16.dp))
+                    Modifier
+                        .fillMaxWidth(0.92f)
+                        .background(
+                            grayColorSemiTransparent,
+                            shape = RoundedCornerShape(16.dp)
+                        )
                 ) {
                     Row(
                         Modifier
@@ -327,8 +347,9 @@ fun WeatherDialog(
                     }
                 }
                 Row(horizontalArrangement = Arrangement.Center,
-                    modifier = Modifier.fillMaxWidth()
-                                        .padding(vertical = 4.dp)) {
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp)) {
                     Icon(
                         painter = painterResource(evaluation.second),
                         modifier = Modifier
@@ -341,7 +362,7 @@ fun WeatherDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 50.dp)
-                        .background(grayColorSemiTransparent,shape = RoundedCornerShape(16.dp)),
+                        .background(grayColorSemiTransparent, shape = RoundedCornerShape(16.dp)),
                     fontSize = 17.sp,
                     textAlign = TextAlign.Center,
                     color = Color(android.graphics.Color.parseColor("#F24726"))
@@ -354,49 +375,110 @@ fun WeatherDialog(
 
 @Composable
 fun AdvisorDialog(
+    airSpaceData: SnapshotStateList<AirSpace>,
+    id:String,
     onDismiss: () -> Unit,
 ){
-    val grayColorSemiTransparent = Color.LightGray.copy(0.6f)
-    Dialog(properties = DialogProperties(usePlatformDefaultWidth = false),
-        onDismissRequest = onDismiss) {
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight().scale(0.9f),
-            shape = RoundedCornerShape(70.dp),
-            color = Color.White
+    val context = LocalContext.current
+    val locationViewModel = LocationViewModel()
+    val airSpace = airSpaceData.firstOrNull { it.id == id }!!
+    locationViewModel.getAirMapRules(context,airSpace.ruleset_id)
+    val airSpaceRules = locationViewModel.AirSpaceRule.observeAsState().value
+    if(locationViewModel.AirSpaceRule.observeAsState().value != null) {
+        Dialog(
+            properties = DialogProperties(usePlatformDefaultWidth = true),
+            onDismissRequest = onDismiss
         ) {
-            Column(modifier = Modifier.padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally) {
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+                    .scale(0.9f),
+                shape = RoundedCornerShape(20.dp),
+                color = Color.White
+            ) {
+                Column() {
+                        Row(
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(
+                                    color = Color.Cyan
+                                )
+                        ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_danger),
+                                    modifier = Modifier
+                                        .size(40.dp)
+                                        .padding(vertical = 8.dp),
+                                    contentDescription = null
+                                )
+                                Text(
+                                    text = "ZONA DE RESTRINCIÓN DE VUELO",
+                                    modifier = Modifier
+                                        .padding(horizontal = 4.dp, vertical = 8.dp),
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(android.graphics.Color.parseColor("#F24726"))
+                                )
 
-                Row(horizontalArrangement = Arrangement.Center,
-                    modifier = Modifier.fillMaxWidth()
-                        .padding(vertical = 4.dp)) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_route),
+
+                        }
+
+                    LazyColumn(
                         modifier = Modifier
-                            .size(24.dp),
-                        contentDescription = null
-                    )
+                            .padding(horizontal = 16.dp)
+                            .fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        item {
+                            Divider(color = Color.Gray, thickness = 1.dp)
+                            AirSpaceText(text = "Nombre de la zona : \n${airSpace.name}")
+                            Divider(color = Color.Gray, thickness = 1.dp)
+                            AirSpaceText(text = "Tipo de aviso : ${airSpace.type}")
+                            Divider(color = Color.Gray, thickness = 1.dp)
+                            AirSpaceText(text = "Pais : ${airSpace.country}")
+                            Divider(color = Color.Gray, thickness = 1.dp)
+                            AirSpaceText(text = "Región/Provincia : ${airSpace.state}")
+                            Divider(color = Color.Gray, thickness = 1.dp)
+                            AirSpaceText(text = "Ciudad : ${airSpace.city}")
+                            Divider(color = Color.Gray, thickness = 1.dp)
+                            AirSpaceText(text = "Nombre del conjunto de avisos : \n${airSpaceRules?.name}")
+                            Divider(color = Color.Gray, thickness = 1.dp)
+                            AirSpaceText(text = "Descripción del conjunto : \n${airSpaceRules?.description}")
+                            Divider(color = Color.Gray, thickness = 1.dp)
+                            AirSpaceText(text = "Tipos de zonas que aplica : \n${airSpaceRules?.airspace_types}")
+                            Divider(color = Color.Gray, thickness = 1.dp)
+                            AirSpaceText(text = "Avisos de la zona")
+                        }
+                        airSpaceRules?.rules?.size?.let { it ->
+                            items(it){itemIt->
+                                AirSpaceText(text = airSpaceRules.rules[itemIt].description)
+                            }
+                        }
+                    }
                 }
-
-                Text(text = "Considera iso um aviso",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 50.dp)
-                        .background(grayColorSemiTransparent,shape = RoundedCornerShape(16.dp)),
-                    fontSize = 17.sp,
-                    textAlign = TextAlign.Center,
-                    color = Color(android.graphics.Color.parseColor("#F24726"))
-                )
             }
         }
     }
-
 }
 
-@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun AirSpaceText(text:String){
+    Text(
+        text = text,
+        modifier = Modifier
+            .fillMaxWidth(),
+        fontSize = 14.sp,
+        textAlign = TextAlign.Justify,
+        color = Color.Black
+    )
+}
+
+
+/*@Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun DialogPreview(){
-    AdvisorDialog(onDismiss = {})
-}
+    AdvisorDialog(airSpace,onDismiss = {})
+}*/

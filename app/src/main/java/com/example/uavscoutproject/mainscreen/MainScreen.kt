@@ -60,7 +60,7 @@ fun MainScreen(
     droneViewModel: DroneViewModel = viewModel(),
     locationViewModel: LocationViewModel = viewModel()
 ) {
-    val tabTitles = listOf("Inicio", "Mapa", "Datos", "Usuarios")
+    val tabTitles = listOf("Inicio", "Mapa", "Datos"/*, "Usuarios"*/)
     val scaffoldState = rememberScaffoldState()
     val scope = rememberCoroutineScope()
     val isDrawerOpen = remember { mutableStateOf(false) }
@@ -176,12 +176,12 @@ fun ScaffoldContent(
         R.drawable.ic_home,
         R.drawable.ic_location,
         R.drawable.ic_data,
-        R.drawable.ic_social
+        //R.drawable.ic_social
     )
     val pagerState = rememberPagerState()
     val coroutineScope = rememberCoroutineScope()
     val selectedTabIndex = pagerState.currentPage
-    Column( // (2)
+    Column(
         modifier = Modifier.padding(bottom = padding.calculateBottomPadding()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -196,7 +196,7 @@ fun ScaffoldContent(
                     1 -> LocationView(locationViewModel = locationViewModel)
                     2 -> DataView(locationViewModel = locationViewModel,
                                   droneViewModel = droneViewModel)
-                    3 -> UsersView(navController)
+                    //3 -> UsersView(navController)
                 }
             }
         }
