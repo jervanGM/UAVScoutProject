@@ -6,7 +6,8 @@ data class GeocodeResponse(
 
 data class GeocodeItem(
     val title: String,
-    val position: Position
+    val position: Position,
+    var distance : Int = 0
 )
 
 data class Position(

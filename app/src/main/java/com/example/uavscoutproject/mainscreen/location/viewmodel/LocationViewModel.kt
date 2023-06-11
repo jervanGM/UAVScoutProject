@@ -1,8 +1,18 @@
 package com.example.uavscoutproject.mainscreen.location.viewmodel
 
+import android.Manifest
+import android.app.Activity
+import android.app.AlertDialog
 import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.location.Location
+import android.location.LocationManager
+import android.provider.Settings
 import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -22,12 +32,13 @@ import org.osmdroid.util.GeoPoint
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-class LocationViewModel : ViewModel() {
+class LocationViewModel() : ViewModel() {
         val locationDataList = mutableStateListOf<GeocodeItem>()
-        val alterLocationList = mutableStateListOf<GeocodeItem>(GeocodeItem("", Position(null,null)))
+        val alterLocationList = mutableStateListOf<GeocodeItem>(GeocodeItem("Init", Position(null,null)))
         val airSpaceData = mutableStateListOf<AirSpace>()
         val addressSuggestions = mutableStateListOf<GeocodeItem>()
         val AirSpaceRule  = MutableLiveData<AirMapRulesData>()
+        val REQUEST_LOCATION_PERMISSION = 99
         val locationretrofit: Retrofit = Retrofit.Builder()
                 .baseUrl("https://geocode.search.hereapi.com/v1/")
                 .addConverterFactory(GsonConverterFactory.create())
@@ -47,6 +58,111 @@ class LocationViewModel : ViewModel() {
         init {
             firestore = FirebaseFirestore.getInstance()
             firestore.firestoreSettings = FirebaseFirestoreSettings.Builder().build()
+        }
+
+    fun updatePositionAndCheckDistance(context:Context,index:Int,newTitle: String,newPosition: Position): Boolean {
+        if (alterLocationList.size != 1) {
+            val previousPosition = alterLocationList[index-1].position
+            val originPosition = alterLocationList.first().position
+            Log.d("MARKERS", "${alterLocationList.size}")
+            val distanceToPrevious = calculateDistance(previousPosition, newPosition)
+            if (calculateDistance(originPosition, newPosition) > 10000) {
+                // Mostrar un cuadro de diálogo si la distancia es mayor a 10 km
+                showDistanceAlertDialog(context)
+                return false
+            }
+            else{
+                alterLocationList[index] = GeocodeItem(newTitle,newPosition,distanceToPrevious.toInt())
+                for (loc in (1 until alterLocationList.size)){
+                    alterLocationList[index].distance = calculateDistance(
+                        alterLocationList[loc-1].position,
+                        alterLocationList[loc].position).toInt()
+                }
+                return true
+            }
+        } else{
+            alterLocationList[index] = GeocodeItem(newTitle,newPosition)
+            return true
+        }
+    }
+        fun addPositionAndCheckDistance(context:Context,newTitle: String,newPosition: Position): Boolean {
+            if (alterLocationList.isNotEmpty()) {
+                val firstPosition = alterLocationList.firstOrNull()
+                if (firstPosition?.title == "Init" && firstPosition.position.lat == null && firstPosition.position.lng == null) {
+                    alterLocationList.removeAt(0)
+                }
+            }
+            if (alterLocationList.isNotEmpty()) {
+                val previousPosition = alterLocationList.last().position
+                val originPosition = alterLocationList.first().position
+                val distanceToPrevious = calculateDistance(previousPosition, newPosition)
+                if (calculateDistance(originPosition, newPosition) > 10000) {
+                    // Mostrar un cuadro de diálogo si la distancia es mayor a 10 km
+                    showDistanceAlertDialog(context)
+                    return false
+                }
+                else{
+                    alterLocationList.add(GeocodeItem(newTitle,newPosition,distanceToPrevious.toInt()))
+                    return true
+                }
+            } else{
+                alterLocationList.add(GeocodeItem(newTitle,newPosition))
+                return true
+            }
+        }
+
+        private fun calculateDistance(start: Position, end: Position): Float {
+            val results = FloatArray(1)
+            Location.distanceBetween(
+                start.lat!!, start.lng!!,
+                end.lat!!, end.lng!!,
+                results
+            )
+            return results[0]
+        }
+
+        private fun showDistanceAlertDialog(context: Context) {
+            AlertDialog.Builder(context)
+                .setTitle("Distancia excedida")
+                .setMessage("No se puede establecer posiciones superiores a 10 Km desde el punto de origen.")
+                .setPositiveButton("Aceptar", null)
+                .create().show()
+        }
+        fun setGPSCoordinates(context: Context) {
+            val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+            val gpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+            if (ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                ActivityCompat.requestPermissions(
+                    context as Activity,
+                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                    REQUEST_LOCATION_PERMISSION
+                )
+            }
+            else {
+                if (!gpsEnabled) {
+                    val dialogBuilder = AlertDialog.Builder(context)
+                        .setTitle("Habilitar GPS")
+                        .setMessage("Se requiere habilitar el GPS para obtener la ubicación actual.")
+                        .setPositiveButton("Configuración") { _, _ ->
+                            val settingsIntent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                            context.startActivity(settingsIntent)
+                        }
+                        .setNegativeButton("Cancelar", null)
+                    val dialog = dialogBuilder.create()
+                    dialog.show()
+                }
+                else{
+                    val location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+                    addPositionAndCheckDistance(
+                        context,
+                        "Posicion GPS",
+                        Position(location?.latitude,location?.longitude))
+                }
+            }
         }
 
         fun saveRouteData(){

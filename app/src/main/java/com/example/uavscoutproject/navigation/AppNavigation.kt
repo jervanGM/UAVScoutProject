@@ -12,6 +12,10 @@ import com.example.uavscoutproject.SplashScreen
 import com.example.uavscoutproject.authentication.AuthenticationScreen
 import com.example.uavscoutproject.authentication.ForgotPasswordScreen
 import com.example.uavscoutproject.authentication.RegisterScreen
+import com.example.uavscoutproject.auxscreens.profile.ProfileScreen
+import com.example.uavscoutproject.auxscreens.rulesetinfo.RuleSetInfoSreen
+import com.example.uavscoutproject.auxscreens.settings.SettingsScreen
+import com.example.uavscoutproject.auxscreens.support.SupportScreen
 import com.example.uavscoutproject.mainscreen.home.DroneMakingScreen
 import com.example.uavscoutproject.mainscreen.home.NewsScreen
 import com.example.uavscoutproject.mainscreen.home.droneviewmodel.DroneViewModel
@@ -61,6 +65,18 @@ fun AppNavigation() {
             requireNotNull(url)
             NewsScreen(navController, url)
 
+        }
+        composable(AppScreens.ProfileScreen.route){
+            ProfileScreen(navController)
+        }
+        composable(AppScreens.SettingsScreen.route){
+            SettingsScreen(navController)
+        }
+        composable(AppScreens.RuleSetInfoScreen.route){
+            RuleSetInfoSreen(navController)
+        }
+        composable(AppScreens.SupportScreen.route){
+            SupportScreen(navController)
         }
 
     }

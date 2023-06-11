@@ -47,6 +47,7 @@ import com.example.uavscoutproject.mainscreen.home.HomeView
 import com.example.uavscoutproject.mainscreen.home.droneviewmodel.DroneViewModel
 import com.example.uavscoutproject.mainscreen.location.LocationView
 import com.example.uavscoutproject.mainscreen.location.viewmodel.LocationViewModel
+import com.example.uavscoutproject.navigation.AppScreens
 import com.example.uavscoutproject.navigation.DrawerBody
 import com.example.uavscoutproject.navigation.DrawerHeader
 import com.example.uavscoutproject.navigation.Menuitem
@@ -85,32 +86,32 @@ fun MainScreen(
             DrawerBody(
                 items = listOf(
                     Menuitem(
-                        id = "profile",
+                        id = AppScreens.ProfileScreen.route,
                         title = "Perfil de piloto",
                         description = "Go to pilot profile screen",
                         icon = painterResource(id = R.drawable.ic_profile)
                     ),
                     Menuitem(
-                        id = "ruleset",
+                        id = AppScreens.RuleSetInfoScreen.route,
                         title = "Reglamento",
                         description = "Go to ruleset screen",
                         icon = painterResource(id = R.drawable.ic_rules)
                     ),
                     Menuitem(
-                        id = "settings",
+                        id = AppScreens.SettingsScreen.route,
                         title = "Ajustes",
                         description = "Go to settings screen",
                         icon = painterResource(id = R.drawable.ic_settings)
                     ),
                     Menuitem(
-                        id = "support",
+                        id = AppScreens.SupportScreen.route,
                         title = "Ayuda y soporte",
                         description = "Go to support screen",
                         icon = painterResource(id = R.drawable.ic_support)
                     )
                 ),
                 onItemClick = {
-                    println("Clicked on ${it.title}")
+                    navController.navigate(it.id)
                 },
                 modifier = Modifier.padding(bottom = 16.dp),
                 navController = navController

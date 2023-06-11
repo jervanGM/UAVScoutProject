@@ -19,5 +19,9 @@ sealed class AppScreens(val route:String){
     object ForgotPasswordScreen: AppScreens("forgot_screen")
     object DroneMakingScreen: AppScreens("drone_making_screen")
     object NewsScreen: AppScreens("news_screen")
+    object ProfileScreen: AppScreens("profile_screen")
+    object SettingsScreen: AppScreens("settings_screen")
+    object RuleSetInfoScreen: AppScreens("rulesetinfo_screen")
+    object SupportScreen: AppScreens("support_screen")
 
 }

@@ -15,6 +15,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import com.example.uavscoutproject.R
 import com.example.uavscoutproject.mainscreen.location.MarkerState
+import com.example.uavscoutproject.mainscreen.location.data.GeocodeItem
 import com.example.uavscoutproject.mainscreen.location.data.Position
 import com.example.uavscoutproject.mainscreen.location.viewmodel.LocationViewModel
 import org.osmdroid.util.GeoPoint
@@ -81,13 +82,20 @@ fun MapView(
             m.title = "Test"
             m.snippet = "Posiciones de test"
             m.icon = ContextCompat.getDrawable(context, R.drawable.ic_location)
-            map.overlays.add(m)
-
-            markerPoints.add(m.position)
-            isMarkerSet.value = MarkerState.NO_MARK
+            if(viewModel.addPositionAndCheckDistance(
+                    context,
+                    "${m.position.latitude},${m.position.longitude}",
+                    Position(m.position.latitude,m.position.longitude))) {
+                map.overlays.add(m)
+                markerPoints.add(m.position)
+                isMarkerSet.value = MarkerState.NO_MARK
+            }
+            else{
+                isMarkerSet.value = MarkerState.MARK
+            }
         }
-        for (loc in viewModel.alterLocationList) {
-            if(loc.position.lat != null && loc.position.lng != null) {
+        val loc = viewModel.alterLocationList.last()
+        if(loc.position.lat != null && loc.position.lng != null) {
                 val m = Marker(map)
                 m.position = GeoPoint(loc.position.lat, loc.position.lng)
                 m.title = "Test"
@@ -97,7 +105,7 @@ fun MapView(
 
                 markerPoints.add(m.position)
             }
-        }
+
         Log.d("MARKERS", "${markerPoints}")
         val polyline = Polyline()
         polyline.setPoints(markerPoints)

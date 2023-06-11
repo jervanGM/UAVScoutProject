@@ -1,5 +1,6 @@
 package com.example.uavscoutproject.mainscreen.location
 
+import android.app.AlertDialog
 import android.content.Context
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -111,12 +112,21 @@ fun LocationView(locationViewModel: LocationViewModel = viewModel()) {
                 }
                 LazyColumn(state = scrollState) {
                     items(itemsList.size) { index ->
+                        var success = false
                         LocationItem(
                             index = index,
                             item = itemsList.get(index),
-                            onItemChanged = { i, s -> itemsList[i] = s },
+                            onItemEdited = { i, s -> itemsList[i] = s },
+                            onItemChanged = { i, s ->
+                                success = locationViewModel.updatePositionAndCheckDistance(
+                                    context,
+                                    i,
+                                    s.title
+                                    ,s.position
+                                )
+                                if(success) locationViewModel.requestAirSpace(context, s)},
                             onItemRemoved = { i -> itemsList.removeAt(i) },
-                            onItemAdded = { itemsList.add(GeocodeItem("", Position(null,null))) },
+                            onItemAdded = { itemsList.add(GeocodeItem("Init", Position(null,null))) },
                             canDelete = (itemsList.size > 1),
                             context,
                             locationViewModel = locationViewModel
@@ -141,6 +151,7 @@ fun LocationPreview(){
 fun GeobuttonsRow(
     locationViewModel: LocationViewModel,
     onMarkerChange: () -> Unit) {
+    val context = LocalContext.current
     Row(horizontalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier.padding(top = 8.dp)) {
         Box(
@@ -206,7 +217,7 @@ fun GeobuttonsRow(
         Box(
             modifier = Modifier
                 .weight(0.3f)
-                .clickable(onClick = { /* acción al hacer clic */ }),
+                .clickable(onClick = { locationViewModel.setGPSCoordinates(context = context) }),
             contentAlignment = Alignment.Center
         ) {
             Row(
@@ -239,12 +250,13 @@ fun GeobuttonsRow(
 fun LocationItem(
     index: Int,
     item: GeocodeItem,
+    onItemEdited: (Int, GeocodeItem) -> Unit,
     onItemChanged: (Int, GeocodeItem) -> Unit,
     onItemRemoved: (Int) -> Unit,
     onItemAdded: () -> Unit,
     canDelete: Boolean,
     context: Context,
-    locationViewModel: LocationViewModel = viewModel()
+    locationViewModel: LocationViewModel = viewModel(),
 ) {
     Box(
         Modifier
@@ -260,7 +272,16 @@ fun LocationItem(
         ) {
             IconButton(
                 onClick = {
-                    onItemAdded()
+                    if(locationViewModel.alterLocationList.last().title != "Init") {
+                        onItemAdded()
+                    }
+                    else{
+                        AlertDialog.Builder(context)
+                            .setTitle("Localización previa incorrecta")
+                            .setMessage("Se debe incluir una posición previamente")
+                            .setPositiveButton("Aceptar", null)
+                            .create().show()
+                    }
                 },
                 modifier = Modifier.padding(start = 8.dp)
             ) {
@@ -272,9 +293,9 @@ fun LocationItem(
             }
 
             LocationAutocomplete(
-                searchText = item.title,
+                searchText = if(item.title == "Init") "" else item.title,
                 onSearchTextChanged = { newValue ->
-                    onItemChanged(index, GeocodeItem(newValue,Position(null,null)))
+                    onItemEdited(index, GeocodeItem(newValue,Position(null,null)))
                 },
                 onAddressSelected = { suggestion ->
                     onItemChanged(
@@ -284,7 +305,6 @@ fun LocationItem(
                             Position(suggestion.position.lat,suggestion.position.lng)
                         )
                     )
-                    locationViewModel.requestAirSpace(context, suggestion)
 
                 },
                 modifier = Modifier.weight(1.5f),
@@ -300,7 +320,7 @@ fun LocationItem(
                     .padding(4.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = "-", fontSize = 16.sp)
+                Text(text = "${item.distance}", fontSize = 16.sp)
             }
 
             IconButton(
