@@ -64,7 +64,6 @@ class LocationViewModel() : ViewModel() {
         if (alterLocationList.size != 1) {
             val previousPosition = alterLocationList[index-1].position
             val originPosition = alterLocationList.first().position
-            Log.d("MARKERS", "${alterLocationList.size}")
             val distanceToPrevious = calculateDistance(previousPosition, newPosition)
             if (calculateDistance(originPosition, newPosition) > 10000) {
                 // Mostrar un cuadro de diálogo si la distancia es mayor a 10 km
@@ -72,7 +71,7 @@ class LocationViewModel() : ViewModel() {
                 return false
             }
             else{
-                alterLocationList[index] = GeocodeItem(newTitle,newPosition,distanceToPrevious.toInt())
+                alterLocationList[index] = GeocodeItem(newTitle,newPosition,distance = distanceToPrevious.toInt())
                 for (loc in (1 until alterLocationList.size)){
                     alterLocationList[index].distance = calculateDistance(
                         alterLocationList[loc-1].position,
@@ -102,7 +101,7 @@ class LocationViewModel() : ViewModel() {
                     return false
                 }
                 else{
-                    alterLocationList.add(GeocodeItem(newTitle,newPosition,distanceToPrevious.toInt()))
+                    alterLocationList.add(GeocodeItem(newTitle,newPosition,distance = distanceToPrevious.toInt()))
                     return true
                 }
             } else{

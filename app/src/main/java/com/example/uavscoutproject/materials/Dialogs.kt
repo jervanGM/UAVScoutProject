@@ -57,9 +57,12 @@ fun DroneDialog(dronedata: Dronedata, onDismiss: () -> Unit){
         "Velocidad","Energía",
         "Peso neto", "Capacidad")
     val droneData = listOf(
-        dronedata.color, dronedata.battery,
-        dronedata.speed, dronedata.energy,
-        dronedata.weight, dronedata.capacity
+        dronedata.color,
+        dronedata.battery,
+        dronedata.speed.filter { it.isDigit() }.toIntOrNull(),
+        dronedata.energy.filter { it.isDigit() }.toIntOrNull(),
+        dronedata.weight.filter { it.isDigit() }.toIntOrNull(),
+        dronedata.capacity.filter { it.isDigit() }.toIntOrNull()
     )
     val tablefontSize = 14.sp
     Dialog(properties = DialogProperties(usePlatformDefaultWidth = false),
@@ -197,9 +200,9 @@ fun DroneDialog(dronedata: Dronedata, onDismiss: () -> Unit){
                             .padding(vertical = 8.dp)
                     ) {
                         TableCell(text = droneAttribute[0],tablefontSize,true, weight = 2f)
-                        TableCell(text = droneData[0],tablefontSize, weight = 2f)
+                        TableCell(text = droneData[0] as String,tablefontSize, weight = 2f)
                         TableCell(text = droneAttribute[1],tablefontSize,true, weight = 2f)
-                        TableCell(text = droneData[1],tablefontSize, weight = 2f)
+                        TableCell(text = droneData[1] as String,tablefontSize, weight = 2f)
                     }
 
                     Row(
@@ -208,9 +211,9 @@ fun DroneDialog(dronedata: Dronedata, onDismiss: () -> Unit){
                             .padding(vertical = 8.dp)
                     ) {
                         TableCell(text = droneAttribute[2],tablefontSize, true,weight = 2f)
-                        TableCell(text = droneData[2],tablefontSize, weight = 2f)
+                        TableCell(text = "${droneData[2]} Km/h",tablefontSize, weight = 2f)
                         TableCell(text = droneAttribute[3],tablefontSize,true, weight = 2f)
-                        TableCell(text = droneData[3],tablefontSize, weight = 2f)
+                        TableCell(text = "${droneData[3]} Wh",tablefontSize, weight = 2f)
                     }
 
                     Row(
@@ -219,9 +222,9 @@ fun DroneDialog(dronedata: Dronedata, onDismiss: () -> Unit){
                             .padding(vertical = 8.dp)
                     ) {
                         TableCell(text = droneAttribute[4],tablefontSize,true, weight = 2f)
-                        TableCell(text = droneData[4],tablefontSize, weight = 2f)
+                        TableCell(text = "${droneData[4]} g",tablefontSize, weight = 2f)
                         TableCell(text = droneAttribute[5],tablefontSize,true, weight = 2f)
-                        TableCell(text = droneData[5],tablefontSize, weight = 2f)
+                        TableCell(text = "${droneData[5]} mAh",tablefontSize, weight = 2f)
                     }
                 }
                 Text(text = "Información adicional",

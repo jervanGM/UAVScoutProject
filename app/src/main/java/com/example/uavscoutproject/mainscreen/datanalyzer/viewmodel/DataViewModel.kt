@@ -13,7 +13,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.uavscoutproject.R
 import com.example.uavscoutproject.mainscreen.datanalyzer.data.HourlyData
+import com.example.uavscoutproject.mainscreen.datanalyzer.data.RouteStatistics
 import com.example.uavscoutproject.mainscreen.datanalyzer.weatherapi.WeatherApiService
+import com.example.uavscoutproject.mainscreen.home.data.Dronedata
 import com.example.uavscoutproject.mainscreen.location.data.GeocodeItem
 import com.example.uavscoutproject.mainscreen.location.data.Position
 import com.google.firebase.firestore.FirebaseFirestore
@@ -27,6 +29,7 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.Locale
+import kotlin.math.roundToInt
 
 class DataViewModel(application: Application) : AndroidViewModel(application) {
     private val sensorManager = application.getSystemService(Context.SENSOR_SERVICE) as SensorManager
@@ -107,7 +110,7 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
                                 hourlyFields,
                                 forecastDays
                             )
-
+                        location.elevation = response.elevation
                         hourlyDataList.add(response.hourly)
                     }
                     calculateAverage(hourlyDataList, hourlyDataList[0].time)
@@ -246,7 +249,7 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         }
 
         override fun onSensorChanged(event: SensorEvent) {
-
+            val decimalFormat = DecimalFormat("#.##")
             when (event.sensor.type) {
                 Sensor.TYPE_AMBIENT_TEMPERATURE -> {
                     _temperaturaState.value = event.values[0]
@@ -255,7 +258,9 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
                     _humedadState.value = event.values[0]
                 }
                 Sensor.TYPE_PRESSURE -> {
-                    _presionState.value = (event.values[0]/1000)
+                    _presionState.value = decimalFormat
+                        .format(event.values[0] / 1000)
+                        .toFloat()
                 }
                 Sensor.TYPE_LIGHT -> {
                     _iluminacionState.value = event.values[0]/100
@@ -301,6 +306,127 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
     private fun stopListening() {
         sensorManager.unregisterListener(sensorListener)
     }
+
+    fun calculateRouteStatistics(droneData: Dronedata, weatherData: HourlyData, route: List<GeocodeItem>): RouteStatistics {
+        // Cálculos para obtener los parámetros deseados
+        if(route.isNotEmpty()) {
+            val totalDistance = calculateTotalDistance(route)
+            val averageSpeed = calculateAverageSpeed(droneData, weatherData)
+            val flightDuration = calculateFlighDuration(totalDistance, averageSpeed)
+            val totalConsumption = calculateTotalConsumption(droneData, flightDuration)
+            val minmaxAltitude = calculateMinMaxAltitude(route)
+            val routeEvaluation = calculateRouteEvaluation(weatherData,droneData,totalConsumption)
+
+            return RouteStatistics(
+                totalDistance = totalDistance / 1000,
+                totalConsumption = totalConsumption.toInt(),
+                averageSpeed = averageSpeed.toInt(),
+                flightDuration = (flightDuration * 60).toInt(),
+                minAltitude = (minmaxAltitude.first / 1000),
+                maxAltitude = (minmaxAltitude.second / 1000),
+                routeEvaluation = routeEvaluation
+            )
+        }
+        else{
+            return RouteStatistics(
+                0.0, 0,
+                0, 0,
+                0.0, 0.0,
+                Triple(android.graphics.Color.parseColor("#66FBB0"),
+                    R.drawable.ic_void,"No hay condiciones para volar")
+            )
+        }
+    }
+
+    private fun calculateRouteEvaluation(
+        weatherData: HourlyData,
+        droneData: Dronedata,
+        totalConsumption: Double
+    ): Triple<Int, Int, String>  {
+            var evaluator = 0.0
+            val maxenergy = droneData.energy.filter { it.isDigit() }.toDoubleOrNull()
+        if (maxenergy != null) {
+            for (index in 0 until weatherData.temperature_2m.size){
+                val evaluation = weatherData.evaluateFlightPossibility(index)
+                evaluator += when (evaluation.second){
+                    (R.drawable.ic_void) ->
+                        if(maxenergy>totalConsumption) 1 else 3
+
+                    R.drawable.ic_warning ->
+                        if(maxenergy>totalConsumption) 2 else 3
+                    R.drawable.ic_danger  -> 3
+                    else -> 0
+                }
+            }
+        }
+        val finalEvaluation = (evaluator/weatherData.temperature_2m.size).roundToInt()
+        return when(finalEvaluation){
+            1 -> Triple(android.graphics.Color.parseColor("#66FBB0"),
+                R.drawable.ic_void,"Las condiciones son optimas para volar")
+            2 -> Triple(android.graphics.Color.parseColor("#FDAB48"),
+                R.drawable.ic_warning,"Las condiciones actuales son poco aptas para el vuelo")
+            3-> Triple(android.graphics.Color.parseColor("#FF6347"),
+                R.drawable.ic_danger,"Las condiciones actuales no son aptas para el vuelo")
+            else -> {
+                Triple(android.graphics.Color.parseColor("#66FBB0"),
+                R.drawable.ic_void,"No hay condiciones para volar")
+            }
+        }
+    }
+
+    private fun calculateMinMaxAltitude(route: List<GeocodeItem>): Pair<Double,Double> {
+            val minAltitude = route.map { it.elevation }.min()
+            val maxAltitude = route.map { it.elevation }.max()
+        return Pair(minAltitude,maxAltitude)
+    }
+
+    private fun calculateFlighDuration(totalDistance: Double, averageSpeed: Double): Double {
+            return (totalDistance.toDouble()/(1000*averageSpeed))
+    }
+
+    private fun calculateTotalDistance(route: List<GeocodeItem>): Double {
+          return  route.map { it.distance.toDouble() }.sum()
+    }
+
+    private fun calculateTotalConsumption(droneData: Dronedata, flightDuration: Double): Double {
+        val batteryConsumption = droneData.energy.filter { it.isDigit() }.toDoubleOrNull()
+        var consumption = 0.0
+        if(batteryConsumption !=null){
+            consumption = batteryConsumption*flightDuration
+        }
+        return consumption
+    }
+
+    fun calculateAverageSpeed(droneData: Dronedata, weatherData: HourlyData): Double {
+        val maxSpeed = droneData.speed.filter { it.isDigit() }.toDoubleOrNull()
+        val weatherSpeed = calculateWeatherAdjustedSpeed(weatherData)
+        var averageSpeed = 0.0
+        // Calcular la velocidad media teniendo en cuenta la velocidad máxima y la velocidad ajustada por el clima
+        if (maxSpeed != null) {
+            averageSpeed = (maxSpeed + weatherSpeed) / 2
+        } else {
+            // La cadena no contiene un número válido
+            // Maneja el caso de error según tus necesidades
+        }
+        return averageSpeed
+    }
+
+    private fun calculateWeatherAdjustedSpeed(weatherData: HourlyData): Double {
+        // Lógica para ajustar la velocidad en base a las condiciones climáticas
+        // Puedes utilizar los datos de weatherData para calcular el ajuste en función del clima
+
+        // Ejemplo de ajuste simple:
+        val precipitationProbability = weatherData.precipitation_probability.average()
+        val weatherSpeedAdjustment = when {
+            precipitationProbability > 50 -> -2.0
+            (weatherData.windspeed_10m.average() ?: 0.0) > 10.0 -> -1.0
+            else -> 0.0
+        }
+
+        // Devolver la velocidad ajustada por el clima
+        return weatherSpeedAdjustment
+    }
+
 }
 
 

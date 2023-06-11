@@ -2,6 +2,7 @@ package com.example.uavscoutproject.preferences
 
 import android.content.Context
 import android.provider.Settings.Secure.getString
+import android.util.Log
 import com.example.uavscoutproject.R
 
 class MyPreferences(context: Context) {
@@ -28,5 +29,14 @@ class MyPreferences(context: Context) {
     }
     fun getPassword(): String? {
         return sharedPreferences.getString("password", null)
+    }
+
+    fun setBooleanSetting(preference: String, settingState: Boolean){
+        Log.d("SETTINGS","$preference,$settingState")
+        sharedPreferences.edit().putBoolean(preference,settingState).apply()
+    }
+    fun getBooleanSetting(preference: String) : Boolean{
+        Log.d("SETTINGS","${sharedPreferences.getBoolean(preference,false)}")
+        return sharedPreferences.getBoolean(preference,false)
     }
 }

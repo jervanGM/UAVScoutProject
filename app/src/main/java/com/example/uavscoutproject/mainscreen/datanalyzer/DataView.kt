@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.uavscoutproject.R
 import com.example.uavscoutproject.mainscreen.datanalyzer.data.HourlyData
+import com.example.uavscoutproject.mainscreen.datanalyzer.data.RouteStatistics
 import com.example.uavscoutproject.mainscreen.datanalyzer.viewmodel.DataViewModel
 import com.example.uavscoutproject.mainscreen.home.TableCell
 import com.example.uavscoutproject.mainscreen.home.data.Dronedata
@@ -65,11 +66,14 @@ fun DataView(dataViewModel: DataViewModel = viewModel(),
     val droneAttribute = listOf("Distancia", "Consumo",
         "Velocidad","Duración",
         "Altitud")
-    val droneData = listOf("21 km", "35 W",
-        "87 Kmh", "23 min",
-        "0.8 Km-1.2 Km")
+    var droneData = RouteStatistics(
+        0.0, 0,
+        0, 0,
+        0.0, 0.0,
+        Triple(android.graphics.Color.parseColor("#66FBB0"),
+            R.drawable.ic_void,"No hay condiciones para volar")
+    )
     val tablefontSize = 14.sp
-    val redColor = Color(android.graphics.Color.parseColor("#F24726"))
     val fistLocation = dataViewModel.firstlocation.title
     val lastLocation = dataViewModel.lastlocation.title
     val hourlyData = dataViewModel.getWeatherValue()
@@ -193,7 +197,13 @@ fun DataView(dataViewModel: DataViewModel = viewModel(),
         dropDownMenuData(
             expanded,
             onExpandedChange = { expanded = it },
-            ondroneSelected = {},
+            ondroneSelected = {drone ->
+                                droneData = dataViewModel.calculateRouteStatistics(
+                                    droneData = drone,
+                                    weatherData = hourlyData,
+                                    route = locationViewModel.locationDataList
+                                )
+                              },
             items)
         Column(
             Modifier.padding(horizontal = 16.dp)
@@ -204,9 +214,9 @@ fun DataView(dataViewModel: DataViewModel = viewModel(),
                     .padding(vertical = 8.dp)
             ) {
                 TableCell(text = droneAttribute[0],tablefontSize,true, weight = 2f)
-                TableCell(text = droneData[0],tablefontSize, weight = 2f)
+                TableCell(text = "${droneData.totalDistance} Km",tablefontSize, weight = 2f)
                 TableCell(text = droneAttribute[1],tablefontSize,true, weight = 2f)
-                TableCell(text = droneData[1],tablefontSize, weight = 2f)
+                TableCell(text = "${droneData.totalConsumption} W",tablefontSize, weight = 2f)
             }
 
             Row(
@@ -215,9 +225,9 @@ fun DataView(dataViewModel: DataViewModel = viewModel(),
                     .padding(vertical = 8.dp)
             ) {
                 TableCell(text = droneAttribute[2],tablefontSize, true,weight = 2f)
-                TableCell(text = droneData[2],tablefontSize, weight = 2f)
+                TableCell(text = "${droneData.averageSpeed} Km/h",tablefontSize, weight = 2f)
                 TableCell(text = droneAttribute[3],tablefontSize,true, weight = 2f)
-                TableCell(text = droneData[3],tablefontSize, weight = 2f)
+                TableCell(text = "${droneData.flightDuration} min",tablefontSize, weight = 2f)
             }
 
             Row(
@@ -226,10 +236,11 @@ fun DataView(dataViewModel: DataViewModel = viewModel(),
                     .padding(vertical = 8.dp)
             ) {
                 TableCell(text = droneAttribute[4],tablefontSize,true, weight = 1.6f)
-                TableCell(text = droneData[4],tablefontSize, weight = 5f)
+                TableCell(text = "${droneData.minAltitude} Km - ${droneData.maxAltitude} Km",tablefontSize, weight = 5f)
             }
         }
         Box(modifier = Modifier.padding(horizontal = 24.dp)) {
+            val redColor = Color(droneData.routeEvaluation.first)
             Row(
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically,
@@ -239,13 +250,13 @@ fun DataView(dataViewModel: DataViewModel = viewModel(),
                     .border(2.dp, redColor, shape = RoundedCornerShape(4.dp))
             ) {
                 Icon(
-                    painter = painterResource(id = R.drawable.ic_warning),
+                    painter = painterResource(id = droneData.routeEvaluation.second),
                     contentDescription = "Añadir item",
                     tint = redColor,
                     modifier = Modifier.size(14.dp)
                 )
                 Text(
-                    "Las condiciones actuales no son aptas para el vuelo",
+                    droneData.routeEvaluation.third,
                     fontSize = 10.sp,
                     color = redColor,
                     modifier = Modifier.padding(8.dp)
@@ -352,7 +363,7 @@ fun dropDownMenuData(
     items: List<Dronedata>
 ) {
     var selectedItem by remember { mutableStateOf<String?>(null) }
-
+    var selectedIconItem by remember { mutableStateOf<Int>(R.drawable.ic_arrow_down) }
     Column(Modifier.padding(horizontal = 22.dp)) {
         Row(
             Modifier
@@ -378,8 +389,9 @@ fun dropDownMenuData(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        imageVector = Icons.Default.ArrowDropDown,
+                        painter = painterResource(selectedIconItem),
                         contentDescription = null,
+                        modifier = Modifier.size(24.dp)
                     )
                     Text(
                         selectedItem ?: "Lista de aeromodelos",
@@ -407,7 +419,8 @@ fun dropDownMenuData(
                     text = {
                         Row() {
                             Icon(
-                                imageVector = Icons.Default.ArrowDropDown,
+                                painter = painterResource(item.icon),
+                                modifier = Modifier.size(24.dp),
                                 contentDescription = null,
                             )
                             Text(
@@ -422,6 +435,7 @@ fun dropDownMenuData(
                     onClick = {
                         ondroneSelected(item)
                         selectedItem = item.name
+                        selectedIconItem = item.icon
                         onExpandedChange(false)
                     }
                 )

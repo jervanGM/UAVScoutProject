@@ -28,6 +28,7 @@ import com.example.uavscoutproject.mainscreen.home.newsapi.ArticleComposer
 import com.example.uavscoutproject.mainscreen.home.newsapi.RetrofitClient
 import com.example.uavscoutproject.mainscreen.location.viewmodel.LocationViewModel
 import com.example.uavscoutproject.navigation.AppScreens
+import com.example.uavscoutproject.preferences.MyPreferences
 
 @Composable
 fun SplashScreen(
@@ -43,7 +44,9 @@ fun SplashScreen(
         newsDroneApi(context)
         val navigate = if(authenticationviewModel.isLoggedIn())
                         {
-                            droneViewModel.getPersonalDroneData(cloudSave = false)
+                            droneViewModel.getPersonalDroneData(cloudSave =
+                            MyPreferences(context)
+                                .getBooleanSetting("isLocal"))
                             AppScreens.MainScreen.route
                         }
                        else AppScreens.AuthenticationScreen.route

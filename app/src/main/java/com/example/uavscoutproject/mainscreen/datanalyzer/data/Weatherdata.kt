@@ -3,6 +3,7 @@ package com.example.uavscoutproject.mainscreen.datanalyzer.data
 import com.example.uavscoutproject.R
 
 data class WeatherResponse(
+    val elevation: Double,
     val hourly: HourlyData
 )
 

@@ -3,6 +3,7 @@ package com.example.uavscoutproject.mainscreen.home.data
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.example.uavscoutproject.R
 
 @Entity(tableName = "personal_drones")
 class Dronedata {
@@ -104,7 +105,14 @@ class Dronedata {
         set(value) {
             _imgUri = value
         }
-
+    val icon:Int
+        get() = when(vehicle){
+            "UAV Multirrotor" -> R.drawable.ic_drone
+            "Helicóptero" -> R.drawable.ic_helicopter
+            "Aeromodelo" -> R.drawable.ic_plane
+            "Ala" -> R.drawable.ic_wing
+            else -> R.drawable.ic_arrow_down
+        }
 
     fun isNotBlank(): Boolean{
         return  name.isNotBlank() ||

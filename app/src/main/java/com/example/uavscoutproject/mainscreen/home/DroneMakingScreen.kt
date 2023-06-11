@@ -129,8 +129,8 @@ fun DroneMaking(
 ) {
     var expanded by remember { mutableStateOf(false) }
     val fields = listOf("Nombre", "Aeronave", "Proveedor") //campos editables
-    val fieldscar = listOf("Color", "Velocidad", "Peso neto",
-        "Batería", "Energía", "Capacidad") //campos editables
+    val fieldscar = listOf("Color", "Velocidad (Km/h)", "Peso neto (g)",
+        "Batería", "Energía (Wh)", "Capacidad (mAh)") //campos editables
     val fieldsc = listOf("Operadora", "Teléfono", "N/S") //campos editables
     val valuesinfo: MutableState<List<String>> = remember { mutableStateOf(emptyList()) }
     val valueschar: MutableState<List<String>> = remember { mutableStateOf(emptyList()) }
@@ -422,6 +422,7 @@ fun DropDownMenu(
     onDroneSelected: (Dronedata) -> Unit,
 ) {
     var selectedItem by remember { mutableStateOf<String?>(null) }
+    var selectedIconItem by remember { mutableStateOf<Int>(R.drawable.ic_arrow_down) }
     Column {
         Row(
             Modifier
@@ -447,8 +448,9 @@ fun DropDownMenu(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        imageVector = Icons.Default.ArrowDropDown,
+                        painter = painterResource(selectedIconItem),
                         contentDescription = null,
+                        modifier = Modifier.size(24.dp)
                     )
                     Text(
                         selectedItem ?: "Lista de aeromodelos",
@@ -478,7 +480,8 @@ fun DropDownMenu(
                     text = {
                         Row {
                             Icon(
-                                imageVector = Icons.Default.ArrowDropDown,
+                                painter = painterResource(item.icon),
+                                modifier = Modifier.size(24.dp),
                                 contentDescription = null,
                             )
                             Text(
@@ -492,6 +495,7 @@ fun DropDownMenu(
                     },
                     onClick = {
                         selectedItem = item.name
+                        selectedIconItem = item.icon
                         onDroneSelected(item)
                         onExpandedChange(false)
                     }
