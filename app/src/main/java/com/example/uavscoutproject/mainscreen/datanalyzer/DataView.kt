@@ -84,12 +84,12 @@ fun DataView(dataViewModel: DataViewModel = viewModel(),
     LaunchedEffect(Unit) {
         dataViewModel.startListening()
         while (true) {
-            dataViewModel.saveSensorData()
+            dataViewModel.saveSensorData(!MyPreferences(context).getBooleanSetting("isLocal"))
             delay(60000) // Retraso de 60 segundos
         }
     }
     dataViewModel.fetchHourlyWeatherData(locationViewModel.locationDataList)
-    dataViewModel.saveWeatherData()
+    dataViewModel.saveWeatherData(!MyPreferences(context).getBooleanSetting("isLocal"))
     LazyColumn(horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxWidth()) {
         item{
@@ -159,7 +159,7 @@ fun DataView(dataViewModel: DataViewModel = viewModel(),
                 LazyRow(
                 ) {
 
-                    itemsIndexed(hourlyData.time) { index, item ->
+                    itemsIndexed(hourlyData.time) { index, _ ->
                         val indexes = hourlyData.getDayWeatherData(selectedOption)
                         if (index in indexes.first..indexes.second) {
                             if (show) {
@@ -197,7 +197,7 @@ fun DataView(dataViewModel: DataViewModel = viewModel(),
             modifier = Modifier.padding(bottom = 8.dp),
             fontSize = 14.sp
         )
-        dropDownMenuData(
+        DropDownMenuData(
             expanded,
             onExpandedChange = { expanded = it },
             ondroneSelected = {drone ->
@@ -362,14 +362,14 @@ fun WeatherBox(
 
 
 @Composable
-fun dropDownMenuData(
+fun DropDownMenuData(
     expanded: Boolean,
     onExpandedChange: (Boolean) -> Unit,
     ondroneSelected: (Dronedata) -> Unit,
     items: List<Dronedata>
 ) {
     var selectedItem by remember { mutableStateOf<String?>(null) }
-    var selectedIconItem by remember { mutableStateOf<Int>(R.drawable.ic_arrow_down) }
+    var selectedIconItem by remember { mutableStateOf(R.drawable.ic_arrow_down) }
     Column(Modifier.padding(horizontal = 22.dp)) {
         Row(
             Modifier

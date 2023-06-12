@@ -46,48 +46,51 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         .addConverterFactory(GsonConverterFactory.create())
         .build()
     val weatherApiService = retrofit.create(WeatherApiService::class.java)
-    private lateinit var firestore: FirebaseFirestore
+    private var firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
 
     init {
-        firestore = FirebaseFirestore.getInstance()
         firestore.firestoreSettings = FirebaseFirestoreSettings.Builder().build()
     }
 
 
-    fun saveWeatherData() {
-        val weatherdata = DataMaker.getData()
-        val collection = firestore.collection("weatherdata")
-        val document = if (weatherdata.id.isNullOrEmpty()) {
-            collection.document()
-        } else {
-            collection.document(weatherdata.id)
-        }
-        weatherdata.id = document.id
-        val handle = document.set(weatherdata)
-        handle.addOnSuccessListener {
-            Log.d("Firebase", "Document saved")
-        }
-        handle.addOnFailureListener {
-            Log.d("Firebase", "Save failed $it ")
+    fun saveWeatherData(cloudSave: Boolean) {
+        if(cloudSave) {
+            val weatherdata = DataMaker.getData()
+            val collection = firestore.collection("weatherdata")
+            val document = if (weatherdata.id.isEmpty()) {
+                collection.document()
+            } else {
+                collection.document(weatherdata.id)
+            }
+            weatherdata.id = document.id
+            val handle = document.set(weatherdata)
+            handle.addOnSuccessListener {
+                Log.d("Firebase", "Document saved")
+            }
+            handle.addOnFailureListener {
+                Log.d("Firebase", "Save failed $it ")
+            }
         }
     }
 
 
-    fun saveSensorData(){
-        val sensorsList = mapOf(
-            "temperaturaState" to _temperaturaState.value,
-            "humedadState" to _humedadState.value,
-            "presionState" to _presionState.value,
-            "iluminacionState" to _iluminacionState.value
-        )
-        val document = firestore.collection("sensordata").document()
+    fun saveSensorData(cloudSave: Boolean){
+        if(cloudSave) {
+            val sensorsList = mapOf(
+                "temperaturaState" to _temperaturaState.value,
+                "humedadState" to _humedadState.value,
+                "presionState" to _presionState.value,
+                "iluminacionState" to _iluminacionState.value
+            )
+            val document = firestore.collection("sensordata").document()
 
-        val handle = document.set(sensorsList)
-        handle.addOnSuccessListener {
-            Log.d("Firebase", "Document saved")
-        }
-        handle.addOnFailureListener{
-            Log.d("Firebase", "Save failed $it ")
+            val handle = document.set(sensorsList)
+            handle.addOnSuccessListener {
+                Log.d("Firebase", "Document saved")
+            }
+            handle.addOnFailureListener {
+                Log.d("Firebase", "Save failed $it ")
+            }
         }
     }
 
@@ -233,7 +236,7 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
     fun getCurrentDate(): Map<String, String>{
         val currentDate = Calendar.getInstance()
         // Definir el formato ISO-8601
-        val isoFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
 
         // Obtener la fecha en formato ISO-8601
         val dayOfWeekFormat = SimpleDateFormat("EEEE", Locale.getDefault()).format(currentDate.time)
@@ -392,7 +395,7 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun calculateFlighDuration(totalDistance: Double, averageSpeed: Double): Double {
-            return (totalDistance.toDouble()/(1000*averageSpeed))
+            return (totalDistance /(1000*averageSpeed))
     }
 
     private fun calculateTotalDistance(route: List<GeocodeItem>): Double {
@@ -430,7 +433,7 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         val precipitationProbability = weatherData.precipitation_probability.average()
         val weatherSpeedAdjustment = when {
             precipitationProbability > 50 -> -2.0
-            (weatherData.windspeed_10m.average() ?: 0.0) > 10.0 -> -1.0
+            weatherData.windspeed_10m.average() > 10.0 -> -1.0
             else -> 0.0
         }
 

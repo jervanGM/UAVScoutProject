@@ -9,13 +9,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Divider
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -49,7 +49,8 @@ fun SettingsScreen(navController: NavHostController){
             buttonColor = R.color.back_button_color
         )
         },
-        bottomBar = { bottomBar() }
+        bottomBar = { bottomBar() },
+        backgroundColor = MaterialTheme.colorScheme.background
     ){ paddingValues ->
         Settings(padding = paddingValues,context)
     }
@@ -78,7 +79,7 @@ fun Settings(padding: PaddingValues, context:Context) {
             )
         }
         LazyColumn {
-            items(settings.size){it ->
+            items(settings.size){
                 SettingItem(settings[it],context)
             }
         }
@@ -88,7 +89,7 @@ fun Settings(padding: PaddingValues, context:Context) {
 @Composable
 fun SettingItem(setting: Pair<String, String>, context: Context) {
     val preferences = MyPreferences(LocalContext.current)
-    var isChecked = remember { mutableStateOf(preferences.getBooleanSetting(setting.second)) }
+    val isChecked = remember { mutableStateOf(preferences.getBooleanSetting(setting.second)) }
 
     Row(
         modifier = Modifier

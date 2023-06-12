@@ -1,14 +1,14 @@
 package com.example.uavscoutproject.auxscreens.support
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,7 +34,8 @@ fun SupportScreen(navController: NavHostController){
                 buttonColor = R.color.back_button_color
             )
         },
-        bottomBar = { bottomBar() }
+        bottomBar = { bottomBar() },
+        backgroundColor = MaterialTheme.colorScheme.background
     ){ paddingValues ->
         Support(padding = paddingValues)
     }
@@ -42,7 +43,8 @@ fun SupportScreen(navController: NavHostController){
 
 @Composable
 fun Support(padding: PaddingValues) {
-        Column(modifier = Modifier.fillMaxSize(),
+        Column(modifier = Modifier.fillMaxSize()
+            .padding(bottom = padding.calculateBottomPadding()),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center) {
 

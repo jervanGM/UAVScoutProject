@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,7 +33,9 @@ fun NewsScreen(navController: NavHostController, url: String = "") {
                     id = R.drawable.ic_back,
                     buttonColor = R.color.back_button_color
                 )},
-        bottomBar = {bottomBar()}
+        bottomBar = {bottomBar()},
+        backgroundColor = MaterialTheme.colorScheme.background,
+        contentColor = MaterialTheme.colorScheme.onPrimary
     ){ paddingValues ->
         WebContent(url,padding = paddingValues)
     }

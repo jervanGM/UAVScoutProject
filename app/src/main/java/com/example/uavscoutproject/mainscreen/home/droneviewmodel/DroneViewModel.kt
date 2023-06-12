@@ -1,5 +1,6 @@
 package com.example.uavscoutproject.mainscreen.home.droneviewmodel
 
+import android.annotation.SuppressLint
 import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
@@ -18,11 +19,12 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 
+@Suppress("UNCHECKED_CAST", "SENSELESS_COMPARISON")
 class DroneViewModel(application: Application) : AndroidViewModel(application) {
     private val database = (application as UAVScoutApp).database
     private val droneDao = database.personalDroneDao()
     private val routeDao = database.lastDroneDao()
-    private lateinit var firestore: FirebaseFirestore
+    private var firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
     private val user = FirebaseAuth.getInstance().currentUser
 
     enum class LocalMode {
@@ -30,7 +32,6 @@ class DroneViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     init {
-        firestore = FirebaseFirestore.getInstance()
         firestore.firestoreSettings = FirebaseFirestoreSettings.Builder().build()
     }
 
@@ -71,7 +72,7 @@ class DroneViewModel(application: Application) : AndroidViewModel(application) {
                     val jsonArray = JSONArray()
                     for (item in data.values) {
                         if (item is Map<*, *>) {
-                            val jsonObject = JSONObject(item as Map<*, *>)
+                            val jsonObject = JSONObject(item)
                             jsonArray.put(jsonObject)
                         }
                     }
@@ -102,7 +103,7 @@ class DroneViewModel(application: Application) : AndroidViewModel(application) {
                         val jsonArray = JSONArray()
                         for (item in data.values) {
                             if (item is Map<*, *>) {
-                                val jsonObject = JSONObject(item as Map<*, *>)
+                                val jsonObject = JSONObject(item)
                                 jsonArray.put(jsonObject)
                             }
                         }
@@ -170,7 +171,6 @@ class DroneViewModel(application: Application) : AndroidViewModel(application) {
                     LocalMode.SAVE -> saveLocalPersonalDroneData(localIndex)
                     LocalMode.UPDATE -> updateLocalPersonalDroneData(localIndex)
                     LocalMode.DELETE -> deleteLocalPersonalDroneData(localIndex)
-                    else -> Log.d("SQLite", "SQLite DB mode error")
                 }
             }
         }
@@ -237,7 +237,7 @@ class DroneViewModel(application: Application) : AndroidViewModel(application) {
                 "item$index" to geocodeItem
             }.toMap()
 
-            val data = hashMapOf<String, Any>(
+            val data = hashMapOf(
                 "routeData" to routeDataMap,
                 "distance" to RouteMaker.getDistance(),
                 "time" to RouteMaker.getTime(),
@@ -263,6 +263,7 @@ class DroneViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    @SuppressLint("SuspiciousIndentation")
     suspend fun getRouteData(cloudSave:Boolean = true) {
         if (cloudSave) {
             val document = firestore

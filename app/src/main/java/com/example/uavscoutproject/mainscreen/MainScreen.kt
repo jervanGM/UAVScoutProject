@@ -24,6 +24,7 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TabPosition
 import androidx.compose.material3.TabRowDefaults
 import androidx.compose.ui.Alignment
@@ -119,7 +120,8 @@ fun MainScreen(
 
         },
         drawerBackgroundColor = colorResource(id = R.color.colorBackground),
-        drawerGesturesEnabled = isDrawerOpen.value
+        drawerGesturesEnabled = isDrawerOpen.value,
+        backgroundColor = MaterialTheme.colorScheme.background
     ){paddingValues ->
         ScaffoldContent(
             padding = paddingValues,

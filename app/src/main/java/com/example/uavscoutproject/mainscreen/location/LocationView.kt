@@ -61,7 +61,7 @@ fun LocationView(locationViewModel: LocationViewModel = viewModel()) {
     val itemsList = locationViewModel.alterLocationList
     val scrollState = rememberLazyListState()
     val context = LocalContext.current
-    var markerState = remember { mutableStateOf(MarkerState.NO_MARK) }
+    val markerState = remember { mutableStateOf(MarkerState.NO_MARK) }
 
     Column {
        Box(
@@ -112,7 +112,7 @@ fun LocationView(locationViewModel: LocationViewModel = viewModel()) {
                 }
                 LazyColumn(state = scrollState) {
                     items(itemsList.size) { index ->
-                        var success = false
+                        var success: Boolean
                         LocationItem(
                             index = index,
                             item = itemsList.get(index),
@@ -177,7 +177,7 @@ fun GeobuttonsRow(
                 Text(
                     "Marcador",
                     fontSize = 14.sp,
-                    color = androidx.compose.ui.graphics.Color.Black,
+                    color = Color.Black,
                     modifier = Modifier.padding(8.dp)
 
                 )
@@ -209,7 +209,7 @@ fun GeobuttonsRow(
                 Text(
                     "Establecer ruta",
                     fontSize = 14.sp,
-                    color = androidx.compose.ui.graphics.Color.Black,
+                    color = Color.Black,
                     modifier = Modifier.padding(8.dp)
                 )
             }
@@ -238,7 +238,7 @@ fun GeobuttonsRow(
                 Text(
                     "Usar GPS",
                     fontSize = 14.sp,
-                    color = androidx.compose.ui.graphics.Color.Black,
+                    color = Color.Black,
                     modifier = Modifier.padding(8.dp)
                 )
             }
@@ -320,7 +320,14 @@ fun LocationItem(
                     .padding(4.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = "${item.distance}", fontSize = 16.sp)
+                val distance = item.distance.let {
+                    if (it > 999) {
+                        "${"%.2f".format(it.toDouble() / 1000)} Km"
+                    } else {
+                        "$it m"
+                    }
+                }
+                Text(text = distance, fontSize = 14.sp, softWrap = false )
             }
 
             IconButton(

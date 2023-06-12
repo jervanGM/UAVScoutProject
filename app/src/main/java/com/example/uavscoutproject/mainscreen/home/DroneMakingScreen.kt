@@ -2,16 +2,13 @@ package com.example.uavscoutproject.mainscreen.home
 
 import android.app.AlertDialog
 import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -40,14 +37,15 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -69,18 +67,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImagePainter
-import coil.compose.ImagePainter
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.example.uavscoutproject.NavAppbar
 import com.example.uavscoutproject.R
 import com.example.uavscoutproject.mainscreen.home.data.Dronedata
 import com.example.uavscoutproject.mainscreen.home.droneviewmodel.DroneViewModel
-import com.example.uavscoutproject.mainscreen.location.data.GeocodeItem
-import com.example.uavscoutproject.mainscreen.location.data.Position
 import com.example.uavscoutproject.navigation.AppScreens
 import com.example.uavscoutproject.navigation.bottomBar
-import kotlinx.coroutines.launch
 
 @Composable
 fun DroneMakingScreen(navController: NavHostController, edit: Boolean?, index: Int?,
@@ -100,7 +94,8 @@ fun DroneMakingScreen(navController: NavHostController, edit: Boolean?, index: I
             buttonColor = R.color.back_button_color
         )
         },
-        bottomBar = {bottomBar()}
+        bottomBar = {bottomBar()},
+        backgroundColor = MaterialTheme.colorScheme.background
     ){ paddingValues ->
         DroneMaking(padding = paddingValues,context, drone,navController,edit,index)
     }
@@ -125,7 +120,7 @@ fun DroneMaking(
     navController: NavHostController,
     edit: Boolean?,
     index: Int?,
-    droneViewModel: DroneViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+    droneViewModel: DroneViewModel = viewModel()
 ) {
     var expanded by remember { mutableStateOf(false) }
     val fields = listOf("Nombre", "Aeronave", "Proveedor") //campos editables
@@ -268,7 +263,7 @@ fun EditCreateButtons(
     edit: Boolean?,
     index: Int?,
     selectedImageUri: Uri?,
-    droneViewModel: DroneViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+    droneViewModel: DroneViewModel = viewModel()
 ) {
     val droneData = Dronedata().apply {
         name = droneValues[0]
@@ -422,7 +417,7 @@ fun DropDownMenu(
     onDroneSelected: (Dronedata) -> Unit,
 ) {
     var selectedItem by remember { mutableStateOf<String?>(null) }
-    var selectedIconItem by remember { mutableStateOf<Int>(R.drawable.ic_arrow_down) }
+    var selectedIconItem by remember { mutableStateOf(R.drawable.ic_arrow_down) }
     Column {
         Row(
             Modifier
