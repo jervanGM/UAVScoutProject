@@ -16,6 +16,7 @@ import com.example.uavscoutproject.mainscreen.datanalyzer.data.HourlyData
 import com.example.uavscoutproject.mainscreen.datanalyzer.data.RouteStatistics
 import com.example.uavscoutproject.mainscreen.datanalyzer.weatherapi.WeatherApiService
 import com.example.uavscoutproject.mainscreen.home.data.Dronedata
+import com.example.uavscoutproject.mainscreen.home.droneviewmodel.RouteMaker
 import com.example.uavscoutproject.mainscreen.location.data.GeocodeItem
 import com.example.uavscoutproject.mainscreen.location.data.Position
 import com.google.firebase.firestore.FirebaseFirestore
@@ -316,12 +317,22 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
             val totalConsumption = calculateTotalConsumption(droneData, flightDuration)
             val minmaxAltitude = calculateMinMaxAltitude(route)
             val routeEvaluation = calculateRouteEvaluation(weatherData,droneData,totalConsumption)
-
+            val distanceToKm = totalDistance/1000
+            val timeToMin = (flightDuration * 60).toInt()
+            RouteMaker.setRoute(route)
+            RouteMaker.setDistance(distanceToKm)
+            RouteMaker.setTime(timeToMin)
+            RouteMaker.setWeather(when(routeEvaluation.second){
+                R.drawable.ic_void -> "Estable"
+                R.drawable.ic_warning -> "Moderado"
+                R.drawable.ic_danger -> "Dificil"
+                else -> "Desconocido"
+            })
             return RouteStatistics(
-                totalDistance = totalDistance / 1000,
+                totalDistance = distanceToKm,
                 totalConsumption = totalConsumption.toInt(),
                 averageSpeed = averageSpeed.toInt(),
-                flightDuration = (flightDuration * 60).toInt(),
+                flightDuration = timeToMin,
                 minAltitude = (minmaxAltitude.first / 1000),
                 maxAltitude = (minmaxAltitude.second / 1000),
                 routeEvaluation = routeEvaluation

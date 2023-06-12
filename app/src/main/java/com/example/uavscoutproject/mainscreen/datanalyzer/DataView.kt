@@ -35,6 +35,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -51,6 +52,7 @@ import com.example.uavscoutproject.mainscreen.home.data.Dronedata
 import com.example.uavscoutproject.mainscreen.home.droneviewmodel.DroneViewModel
 import com.example.uavscoutproject.mainscreen.location.viewmodel.LocationViewModel
 import com.example.uavscoutproject.materials.WeatherDialog
+import com.example.uavscoutproject.preferences.MyPreferences
 import kotlinx.coroutines.delay
 
 
@@ -77,6 +79,7 @@ fun DataView(dataViewModel: DataViewModel = viewModel(),
     val fistLocation = dataViewModel.firstlocation.title
     val lastLocation = dataViewModel.lastlocation.title
     val hourlyData = dataViewModel.getWeatherValue()
+    val context = LocalContext.current
     // Resto del código de tu vista DataView
     LaunchedEffect(Unit) {
         dataViewModel.startListening()
@@ -202,6 +205,9 @@ fun DataView(dataViewModel: DataViewModel = viewModel(),
                                     droneData = drone,
                                     weatherData = hourlyData,
                                     route = locationViewModel.locationDataList
+                                )
+                                droneViewModel.saveRouteData(
+                                    !MyPreferences(context).getBooleanSetting("isLocal")
                                 )
                               },
             items)

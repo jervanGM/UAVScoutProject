@@ -66,6 +66,7 @@ import com.example.uavscoutproject.mainscreen.location.viewmodel.LocationViewMod
 import com.example.uavscoutproject.mainscreen.home.data.Article
 import com.example.uavscoutproject.mainscreen.home.data.Dronedata
 import com.example.uavscoutproject.mainscreen.home.droneviewmodel.DroneViewModel
+import com.example.uavscoutproject.mainscreen.home.droneviewmodel.RouteMaker
 import com.example.uavscoutproject.mainscreen.home.newsapi.ArticleComposer
 import com.example.uavscoutproject.materials.DroneDialog
 import com.example.uavscoutproject.navigation.AppScreens
@@ -286,11 +287,13 @@ fun LastFlightSection(locationViewModel: LocationViewModel = androidx.lifecycle.
     val flightAttribute = listOf("Ruta", "Distancia recorrida",
         "Tiempo de vuelo", "Clima")
 
-    val locationlist = locationViewModel.locationDataList
-    val firstlocation = if(locationlist.isNotEmpty()) locationlist.first().title else " "
-    val lastlocation = if(locationlist.isNotEmpty()) locationlist.last().title else " "
-    val flightData = listOf("${firstlocation} - ${lastlocation}", "13,2 Km",
-        "26 min", "Estable") // clase de datos
+    val firstlocation = if(RouteMaker.getRoute().isNotEmpty()) RouteMaker.getRoute().first().title else " "
+    val lastlocation = if(RouteMaker.getRoute().isNotEmpty()) RouteMaker.getRoute().last().title else " "
+    val flightData = listOf("$firstlocation - $lastlocation",
+        "${RouteMaker.getDistance()} Km",
+        "${RouteMaker.getTime()} min",
+        RouteMaker.getWeather()
+    ) // clase de datos
     Column(Modifier.padding(horizontal = 16.dp)) {
         Row(
             Modifier
@@ -306,7 +309,10 @@ fun LastFlightSection(locationViewModel: LocationViewModel = androidx.lifecycle.
             )
             Spacer(modifier = Modifier.weight(1f))
             Button(
-                onClick = { /* Perform sign in action */ },
+                onClick = {
+                    locationViewModel.locationDataList.clear()
+                    locationViewModel.locationDataList.addAll(RouteMaker.getRoute())
+                          },
                 shape = RoundedCornerShape(4.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor =

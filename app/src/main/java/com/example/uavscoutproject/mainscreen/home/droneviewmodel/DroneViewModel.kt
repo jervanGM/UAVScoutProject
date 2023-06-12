@@ -3,12 +3,12 @@ package com.example.uavscoutproject.mainscreen.home.droneviewmodel
 import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.uavscoutproject.MainActivity
 import com.example.uavscoutproject.UAVScoutApp
 import com.example.uavscoutproject.mainscreen.home.data.Dronedata
-import com.example.uavscoutproject.mainscreen.home.dronedb.AppDatabase
+import com.example.uavscoutproject.mainscreen.home.data.LastRoute
+import com.example.uavscoutproject.mainscreen.location.data.GeocodeItem
+import com.example.uavscoutproject.mainscreen.location.data.Position
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
@@ -21,6 +21,7 @@ import org.json.JSONObject
 class DroneViewModel(application: Application) : AndroidViewModel(application) {
     private val database = (application as UAVScoutApp).database
     private val droneDao = database.personalDroneDao()
+    private val routeDao = database.lastDroneDao()
     private lateinit var firestore: FirebaseFirestore
     private val user = FirebaseAuth.getInstance().currentUser
 
@@ -211,4 +212,115 @@ class DroneViewModel(application: Application) : AndroidViewModel(application) {
         }
         return dronedataList
     }
+
+    private suspend fun saveLocalRouteData(route: LastRoute){
+
+        routeDao.insert(route)
+        Log.d("SQLite", "Data saved")
+    }
+
+    private suspend fun updateLocalRouteData(route: LastRoute) {
+        routeDao.update(route)
+        Log.d("SQLite", "Data updated")
+    }
+
+    fun saveRouteData(
+        cloudSave:Boolean = true,
+        localMode : LocalMode = LocalMode.SAVE,
+        route : LastRoute = LastRoute()
+    ){
+        if(cloudSave) {
+            val document =
+                firestore.collection("lastroute").document("last_route_${user?.uid}")
+
+            val routeDataMap = RouteMaker.getRoute().mapIndexed { index, geocodeItem ->
+                "item$index" to geocodeItem
+            }.toMap()
+
+            val data = hashMapOf<String, Any>(
+                "routeData" to routeDataMap,
+                "distance" to RouteMaker.getDistance(),
+                "time" to RouteMaker.getTime(),
+                "weather" to RouteMaker.getWeather()
+            )
+
+            document.set(data)
+                .addOnSuccessListener {
+                    Log.d("Firebase", "Document saved")
+                }
+                .addOnFailureListener {
+                    Log.d("Firebase", "Save failed $it")
+                }
+        }
+        else{
+            viewModelScope.launch(Dispatchers.IO) {
+                when(localMode){
+                    LocalMode.SAVE -> saveLocalRouteData(route)
+                    LocalMode.UPDATE -> updateLocalRouteData(route)
+                    else -> Log.d("SQLite", "SQLite DB mode error")
+                }
+            }
+        }
+    }
+
+    suspend fun getRouteData(cloudSave:Boolean = true) {
+        if (cloudSave) {
+            val document = firestore
+                .collection("lastroute")
+                .document("last_route_${user?.uid}")
+
+            val handle = document.get()
+            handle.addOnSuccessListener { documentSnapshot ->
+                if (documentSnapshot != null && documentSnapshot.exists()) {
+                    val distance = documentSnapshot.getDouble("distance")
+                    val routeData = documentSnapshot.get("routeData") as Map<String, Any>?
+                    val time = documentSnapshot.getLong("time")
+                    val weather = documentSnapshot.getString("weather")
+                    val geocodeItemList = convertJsonToGeocodeItemList(routeData)
+
+                        RouteMaker.setRoute(geocodeItemList)
+                        RouteMaker.setDistance(distance!!)
+                        RouteMaker.setTime(time!!.toInt())
+                        RouteMaker.setWeather(weather!!)
+                    }
+            }
+            handle.addOnFailureListener {
+                Log.d("Firebase", "Get failed $it ")
+            }
+        }
+        else{
+            viewModelScope.launch {
+                val route = routeDao.get()
+                if (route != null){
+                    RouteMaker.setRoute(route.route)
+                    RouteMaker.setDistance(route.distance)
+                    RouteMaker.setTime(route.time)
+                    RouteMaker.setWeather(route.weather)
+                }
+            }
+        }
+    }
+    private fun convertJsonToGeocodeItemList(routeData: Map<String, Any>?): List<GeocodeItem> {
+        val geocodeItemList = mutableListOf<GeocodeItem>()
+        if (routeData != null) {
+            for (item in routeData) {
+                val attrs = item.value as Map<String, Any>?
+                val positions = attrs?.get("position") as Map<String, Any>?
+                val geoitem = GeocodeItem(
+                    attrs?.get("title") as String,
+                    Position(
+                        positions?.get("lat") as Double,
+                        positions["lng"] as Double
+                    ),
+                    attrs["elevation"] as Double,
+                    attrs["distance"].toString().toInt()
+                )
+                geocodeItemList.add(geoitem)
+            }
+        }
+
+        return geocodeItemList
+    }
+
+
 }

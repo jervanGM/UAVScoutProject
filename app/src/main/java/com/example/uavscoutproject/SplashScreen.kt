@@ -44,9 +44,11 @@ fun SplashScreen(
         newsDroneApi(context)
         val navigate = if(authenticationviewModel.isLoggedIn())
                         {
-                            droneViewModel.getPersonalDroneData(cloudSave =
-                            MyPreferences(context)
-                                .getBooleanSetting("isLocal"))
+                            val cloudSave = !MyPreferences(context)
+                                .getBooleanSetting("isLocal")
+                            droneViewModel.getRouteData(cloudSave = cloudSave
+                            )
+                            droneViewModel.getPersonalDroneData(cloudSave = cloudSave)
                             AppScreens.MainScreen.route
                         }
                        else AppScreens.AuthenticationScreen.route

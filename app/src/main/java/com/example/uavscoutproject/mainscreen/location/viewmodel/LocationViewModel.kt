@@ -283,7 +283,7 @@ class LocationViewModel() : ViewModel() {
         }
 
         fun stablishRoute(){
-            //locationDataList.clear()
+            locationDataList.clear()
             locationDataList.addAll(alterLocationList)
         }
 
