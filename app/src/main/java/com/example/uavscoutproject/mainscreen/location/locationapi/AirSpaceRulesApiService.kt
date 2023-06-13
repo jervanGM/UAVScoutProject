@@ -12,5 +12,5 @@ interface AirSpaceRulesApiService {
         @Path("id") id: String,
         @Header("Accept") accept: String,
         @Header("X-API-KEY") apiKey: String
-    ): AirMapRulesResponse
+    ): retrofit2.Response<AirMapRulesResponse>
 }

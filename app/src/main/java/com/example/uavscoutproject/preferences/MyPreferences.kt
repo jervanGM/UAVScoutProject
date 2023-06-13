@@ -32,11 +32,9 @@ class MyPreferences(context: Context) {
     }
 
     fun setBooleanSetting(preference: String, settingState: Boolean){
-        Log.d("SETTINGS","$preference,$settingState")
         sharedPreferences.edit().putBoolean(preference,settingState).apply()
     }
     fun getBooleanSetting(preference: String) : Boolean{
-        Log.d("SETTINGS","${sharedPreferences.getBoolean(preference,false)}")
         return sharedPreferences.getBoolean(preference,false)
     }
 }

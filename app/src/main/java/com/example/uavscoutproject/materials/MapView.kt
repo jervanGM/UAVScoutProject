@@ -31,6 +31,8 @@ import org.osmdroid.views.overlay.Polyline
 fun MapView(
     modifier: Modifier = Modifier,
     isMarkerSet: MutableState<MarkerState>,
+    deleteLocationIndex : MutableState<Int>,
+    deleteLocation  :MutableState<Boolean>,
     viewModel: LocationViewModel,
     onLoad: ((map: MapView) -> Unit)? = null
 ) {
@@ -39,12 +41,29 @@ fun MapView(
     var polygonId = remember { mutableStateOf("") }
     val markerPoints = mutableListOf<GeoPoint>()
     val context = LocalContext.current
-    val centerMarker = remember { mutableStateOf<Marker?>(null) }
 
     AndroidView(
-        factory = { context ->
+        factory = {
             mapViewState.apply {
+                for (airspace in viewModel.airSpaceData) {
+                    val polygonalChain = mutableListOf<GeoPoint>()
+                    polygonalChain.addAll(airspace.geometry.polygons)
 
+                    val polygon =Polygon()
+                    polygon.points = polygonalChain
+                    polygon.isGeodesic = true
+                    polygon.fillColor = 0x88a42141.toInt()
+                    polygon.strokeWidth = 2f
+                    polygon.infoWindow
+                    polygon.id = airspace.id
+                    polygon.setOnClickListener { polygonal, _, _ ->
+                        polygonId.value = polygonal.id
+                        show.value = true
+                        true
+                    }
+
+                    overlayManager.add(polygon)
+                }
             }
         },
         modifier = modifier
@@ -52,7 +71,7 @@ fun MapView(
             map -> onLoad?.invoke(map)
         val iconSizeFactor = 4 // Factor de escala para agrandar el icono
 
-        val centerOverlay = object : Overlay(context) {
+        val centerOverlay = object : Overlay() {
             override fun draw(canvas: Canvas?, mapProjection: Projection?) {
                 if (isMarkerSet.value == MarkerState.MARK) {
                     val centerPoint = mapProjection!!.toPixels(map.mapCenter, null)
@@ -94,19 +113,21 @@ fun MapView(
                 isMarkerSet.value = MarkerState.MARK
             }
         }
-        val loc = viewModel.alterLocationList.last()
-        if(loc.position.lat != null && loc.position.lng != null) {
-                val m = Marker(map)
-                m.position = GeoPoint(loc.position.lat, loc.position.lng)
-                m.title = "Test"
-                m.snippet = "Posiciones de test"
-                m.icon = ContextCompat.getDrawable(context, R.drawable.ic_location)
-                map.overlays.add(m)
-
-                markerPoints.add(m.position)
+        if(viewModel.alterLocationList.isNotEmpty()) {
+            for (polygon in viewModel.alterLocationList) {
+                if(polygon.title != "Init"
+                    && polygon.position.lat != null
+                    && polygon.position.lng != null) {
+                    val m = Marker(map)
+                    m.position = GeoPoint(polygon.position.lat!!, polygon.position.lng!!)
+                    m.title = polygon.title
+                    m.snippet = "${polygon.position.lat},${polygon.position.lng}"
+                    m.icon = ContextCompat.getDrawable(context, R.drawable.ic_location)
+                    map.overlays.add(m)
+                    markerPoints.add(m.position)
+                }
             }
-
-        Log.d("MARKERS", "${markerPoints}")
+        }
         val polyline = Polyline()
         polyline.setPoints(markerPoints)
         polyline.color = Color.BLUE
@@ -114,24 +135,6 @@ fun MapView(
 
         map.overlayManager.add(polyline)
 
-        for (airspace in viewModel.airSpaceData) {
-            val polygonalChain = mutableListOf<GeoPoint>()
-            polygonalChain.addAll(airspace.geometry.polygons)
-
-            val polygon =Polygon()
-            polygon.points = polygonalChain
-            polygon.fillColor = 0x88a42141.toInt()
-            polygon.strokeWidth = 2f
-            polygon.infoWindow
-            polygon.id = airspace.id
-            polygon.setOnClickListener { polygonal, mapal, eventPos ->
-                polygonId.value = polygonal.id
-                show.value = true
-                true
-            }
-
-            map.overlayManager.add(polygon)
-        }
         map.invalidate()
     }
     if (show.value) {

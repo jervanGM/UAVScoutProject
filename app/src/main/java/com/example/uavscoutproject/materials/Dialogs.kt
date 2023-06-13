@@ -387,79 +387,77 @@ fun AdvisorDialog(
     val airSpace = airSpaceData.firstOrNull { it.id == id }!!
     locationViewModel.getAirMapRules(context,airSpace.ruleset_id)
     val airSpaceRules = locationViewModel.AirSpaceRule.observeAsState().value
-    if(locationViewModel.AirSpaceRule.observeAsState().value != null) {
-        Dialog(
-            properties = DialogProperties(usePlatformDefaultWidth = true),
-            onDismissRequest = onDismiss
+    Dialog(
+        properties = DialogProperties(usePlatformDefaultWidth = true),
+        onDismissRequest = onDismiss
+    ) {
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .scale(0.9f),
+            shape = RoundedCornerShape(20.dp),
+            color = Color.White
         ) {
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight()
-                    .scale(0.9f),
-                shape = RoundedCornerShape(20.dp),
-                color = Color.White
-            ) {
-                Column() {
-                        Row(
-                            horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(
-                                    color = Color.Cyan
-                                )
-                        ) {
-                                Icon(
-                                    painter = painterResource(R.drawable.ic_danger),
-                                    modifier = Modifier
-                                        .size(40.dp)
-                                        .padding(vertical = 8.dp),
-                                    contentDescription = null
-                                )
-                                Text(
-                                    text = "ZONA DE RESTRINCIÓN DE VUELO",
-                                    modifier = Modifier
-                                        .padding(horizontal = 4.dp, vertical = 8.dp),
-                                    fontSize = 15.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color(android.graphics.Color.parseColor("#F24726"))
-                                )
-
-
-                        }
-
-                    LazyColumn(
+            Column() {
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
-                            .padding(horizontal = 16.dp)
-                            .fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                            .fillMaxWidth()
+                            .background(
+                                color = Color.Cyan
+                            )
                     ) {
-                        item {
-                            Divider(color = Color.Gray, thickness = 1.dp)
-                            AirSpaceText(text = "Nombre de la zona : \n${airSpace.name}")
-                            Divider(color = Color.Gray, thickness = 1.dp)
-                            AirSpaceText(text = "Tipo de aviso : ${airSpace.type}")
-                            Divider(color = Color.Gray, thickness = 1.dp)
-                            AirSpaceText(text = "Pais : ${airSpace.country}")
-                            Divider(color = Color.Gray, thickness = 1.dp)
-                            AirSpaceText(text = "Región/Provincia : ${airSpace.state}")
-                            Divider(color = Color.Gray, thickness = 1.dp)
-                            AirSpaceText(text = "Ciudad : ${airSpace.city}")
-                            Divider(color = Color.Gray, thickness = 1.dp)
-                            AirSpaceText(text = "Nombre del conjunto de avisos : \n${airSpaceRules?.name}")
-                            Divider(color = Color.Gray, thickness = 1.dp)
-                            AirSpaceText(text = "Descripción del conjunto : \n${airSpaceRules?.description}")
-                            Divider(color = Color.Gray, thickness = 1.dp)
-                            AirSpaceText(text = "Tipos de zonas que aplica : \n${airSpaceRules?.airspace_types}")
-                            Divider(color = Color.Gray, thickness = 1.dp)
-                            AirSpaceText(text = "Avisos de la zona")
-                        }
-                        airSpaceRules?.rules?.size?.let { it ->
-                            items(it){itemIt->
-                                AirSpaceText(text = airSpaceRules.rules[itemIt].description)
-                            }
-                        }
+                            Icon(
+                                painter = painterResource(R.drawable.ic_danger),
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .padding(vertical = 8.dp),
+                                contentDescription = null
+                            )
+                            Text(
+                                text = "ZONA DE RESTRINCIÓN DE VUELO",
+                                modifier = Modifier
+                                    .padding(horizontal = 4.dp, vertical = 8.dp),
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(android.graphics.Color.parseColor("#F24726"))
+                            )
+
+
+                    }
+
+                LazyColumn(
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                        .fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    item {
+                        Divider(color = Color.Gray, thickness = 1.dp)
+                        AirSpaceText(text = "Nombre de la zona : \n${airSpace.name}")
+                        Divider(color = Color.Gray, thickness = 1.dp)
+                        AirSpaceText(text = "Tipo de aviso : ${airSpace.type}")
+                        Divider(color = Color.Gray, thickness = 1.dp)
+                        AirSpaceText(text = "Pais : ${airSpace.country}")
+                        Divider(color = Color.Gray, thickness = 1.dp)
+                        AirSpaceText(text = "Región/Provincia : ${airSpace.state}")
+                        Divider(color = Color.Gray, thickness = 1.dp)
+                        AirSpaceText(text = "Ciudad : ${airSpace.city}")
+                        /*Divider(color = Color.Gray, thickness = 1.dp)
+                        AirSpaceText(text = "Nombre del conjunto de avisos : \n${airSpaceRules?.name}")
+                        Divider(color = Color.Gray, thickness = 1.dp)
+                        AirSpaceText(text = "Descripción del conjunto : \n${airSpaceRules?.description}")
+                        Divider(color = Color.Gray, thickness = 1.dp)
+                        AirSpaceText(text = "Tipos de zonas que aplica : \n${airSpaceRules?.airspace_types}")
+                        Divider(color = Color.Gray, thickness = 1.dp)
+                        AirSpaceText(text = "Avisos de la zona")
+                    }
+                    airSpaceRules?.rules?.size?.let { it ->
+                        items(it){itemIt->
+                            AirSpaceText(text = airSpaceRules.rules[itemIt].description)
+                        }*/
                     }
                 }
             }

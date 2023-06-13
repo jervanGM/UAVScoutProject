@@ -31,6 +31,7 @@ fun rememberMapViewWithLifecycle(): MapView {
             setMultiTouchControls(true)
             val startPoint = GeoPoint(40.416775, -3.703790)
             setExpectedCenter(startPoint)
+
         }
     }
 

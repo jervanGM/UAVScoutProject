@@ -293,7 +293,8 @@ class LocationViewModel() : ViewModel() {
                 val apiKey = context.getString(R.string.airmap_api_key)
                 try {
                     val response = airMapRulesApi.getAirMapRules(id, acceptHeader, apiKey)
-                    AirSpaceRule.value = response.data
+                    Log.d("LOCATION","${response.code()}")
+                    AirSpaceRule.value = response.body()?.data
                 } catch (e: Exception) {
                     // Maneja cualquier error en la llamada a la API
                     e.printStackTrace()

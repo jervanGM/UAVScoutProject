@@ -2,6 +2,7 @@ package com.example.uavscoutproject.mainscreen.location
 
 import android.app.AlertDialog
 import android.content.Context
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -62,14 +63,20 @@ fun LocationView(locationViewModel: LocationViewModel = viewModel()) {
     val scrollState = rememberLazyListState()
     val context = LocalContext.current
     val markerState = remember { mutableStateOf(MarkerState.NO_MARK) }
-
+    val deleteLocationIndex = remember { mutableStateOf(0) }
+    val deleteLocation = remember { mutableStateOf(false) }
     Column {
        Box(
            Modifier
                .fillMaxWidth()
                .weight(1.5f)
         ) {
-            MapView(modifier = Modifier, isMarkerSet = markerState,locationViewModel)
+            MapView(
+                modifier = Modifier,
+                deleteLocation = deleteLocation,
+                deleteLocationIndex = deleteLocationIndex,
+                isMarkerSet = markerState,
+                viewModel = locationViewModel)
         }
         Box(
             Modifier
@@ -116,7 +123,8 @@ fun LocationView(locationViewModel: LocationViewModel = viewModel()) {
                         LocationItem(
                             index = index,
                             item = itemsList.get(index),
-                            onItemEdited = { i, s -> itemsList[i] = s },
+                            onItemEdited = { i, s -> itemsList[i] = s
+                                           Log.d("LOCATION","${locationViewModel.alterLocationList.size}")},
                             onItemChanged = { i, s ->
                                 success = locationViewModel.updatePositionAndCheckDistance(
                                     context,
@@ -125,7 +133,11 @@ fun LocationView(locationViewModel: LocationViewModel = viewModel()) {
                                     ,s.position
                                 )
                                 if(success) locationViewModel.requestAirSpace(context, s)},
-                            onItemRemoved = { i -> itemsList.removeAt(i) },
+                            onItemRemoved = { i ->
+                                itemsList.removeAt(i)
+                                deleteLocation.value = true
+                                deleteLocationIndex.value = i
+                                            },
                             onItemAdded = { itemsList.add(GeocodeItem("Init", Position(null,null))) },
                             canDelete = (itemsList.size > 1),
                             context,

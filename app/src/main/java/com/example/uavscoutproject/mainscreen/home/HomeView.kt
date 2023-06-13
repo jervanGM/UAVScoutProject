@@ -312,6 +312,8 @@ fun LastFlightSection(locationViewModel: LocationViewModel = androidx.lifecycle.
                 onClick = {
                     locationViewModel.locationDataList.clear()
                     locationViewModel.locationDataList.addAll(RouteMaker.getRoute())
+                    locationViewModel.alterLocationList.clear()
+                    locationViewModel.alterLocationList.addAll(RouteMaker.getRoute())
                           },
                 shape = RoundedCornerShape(4.dp),
                 colors = ButtonDefaults.buttonColors(
