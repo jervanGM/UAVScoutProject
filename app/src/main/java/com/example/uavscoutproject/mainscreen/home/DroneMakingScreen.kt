@@ -62,7 +62,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.net.toUri
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
@@ -74,44 +73,73 @@ import com.example.uavscoutproject.R
 import com.example.uavscoutproject.mainscreen.home.data.Dronedata
 import com.example.uavscoutproject.mainscreen.home.droneviewmodel.DroneViewModel
 import com.example.uavscoutproject.navigation.AppScreens
-import com.example.uavscoutproject.navigation.bottomBar
+import com.example.uavscoutproject.navigation.BottomBar
 
+/**
+ * Composable function that creates the DroneMakingScreen.
+ *
+ * @param navController The NavHostController used for navigation.
+ * @param edit Determines if the screen is in edit mode.
+ * @param index The index of the drone being edited.
+ * @param droneViewModel The view model for managing drone data.
+ */
 @Composable
-fun DroneMakingScreen(navController: NavHostController, edit: Boolean?, index: Int?,
-                      droneViewModel: DroneViewModel = viewModel()) {
-
+fun DroneMakingScreen(
+    navController: NavHostController,
+    edit: Boolean?,
+    index: Int?,
+    droneViewModel: DroneViewModel = viewModel()
+) {
+    // Retrieve the current context
     val context = LocalContext.current
+
+    // Create a new drone or get the existing drone from the view model
     val drone = if (edit == true && index != null) droneViewModel.getItem(index) else Dronedata()
+
+    // Create a scaffold state to manage the Scaffold component
     val scaffoldState = rememberScaffoldState()
+
     Scaffold(
         scaffoldState = scaffoldState,
         topBar = {
+            // Display the top app bar with navigation icon
             NavAppbar(
-            onNavigationIconClick = {
-                navController.navigate(AppScreens.MainScreen.route)
-            },
-            id = R.drawable.ic_back,
-            buttonColor = R.color.back_button_color
-        )
+                onNavigationIconClick = {
+                    navController.navigate(AppScreens.MainScreen.route)
+                },
+                id = R.drawable.ic_back,
+                buttonColor = R.color.back_button_color
+            )
         },
-        bottomBar = {bottomBar()},
+        bottomBar = { BottomBar() },
         backgroundColor = MaterialTheme.colorScheme.background
-    ){ paddingValues ->
-        DroneMaking(padding = paddingValues,context, drone,navController,edit,index)
+    ) { paddingValues ->
+        // Call the DroneMaking composable function to build the screen content
+        DroneMaking(padding = paddingValues, context, drone, navController, edit, index)
     }
-
-
-
-
 }
 
-@Preview(showBackground = true,  heightDp = 1500)
+/**
+ * Preview function for the DroneMakingScreen composable.
+ */
+@Preview(showBackground = true, heightDp = 1500)
 @Composable
-fun DroneMakingScreenPreview(){
+fun DroneMakingScreenPreview() {
     val navController = rememberNavController()
-    DroneMakingScreen(navController, false,0)
+    DroneMakingScreen(navController, false, 0)
 }
 
+/**
+ * Composable function for creating a drone.
+ *
+ * @param padding The padding values for the composable.
+ * @param context The Android context.
+ * @param drone The drone data object.
+ * @param navController The navigation controller for navigating between screens.
+ * @param edit Specifies whether the drone is being edited or not.
+ * @param index The index of the drone in the list.
+ * @param droneViewModel The view model for managing drone data.
+ */
 @Composable
 fun DroneMaking(
     padding: PaddingValues,
@@ -122,87 +150,102 @@ fun DroneMaking(
     index: Int?,
     droneViewModel: DroneViewModel = viewModel()
 ) {
+    // State for managing the expanded state of the drop-down menu
     var expanded by remember { mutableStateOf(false) }
-    val fields = listOf("Nombre", "Aeronave", "Proveedor") //campos editables
-    val fieldscar = listOf("Color", "Velocidad (Km/h)", "Peso neto (g)",
-        "Batería", "Energía (Wh)", "Capacidad (mAh)") //campos editables
-    val fieldsc = listOf("Operadora", "Teléfono", "N/S") //campos editables
+
+    // Lists of fields
+    val fields = listOf("Nombre", "Aeronave", "Proveedor")
+    val fieldscar = listOf("Color", "Velocidad (Km/h)", "Peso neto (g)", "Batería", "Energía (Wh)", "Capacidad (mAh)")
+    val fieldsc = listOf("Operadora", "Teléfono", "N/S")
+
+    // State for managing the values of the fields
     val valuesinfo: MutableState<List<String>> = remember { mutableStateOf(emptyList()) }
     val valueschar: MutableState<List<String>> = remember { mutableStateOf(emptyList()) }
     val valuescha: MutableState<List<String>> = remember { mutableStateOf(emptyList()) }
-    val items = droneViewModel.getDBList()
-    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
-    val scrollState = rememberLazyListState()
+
+    // Get the values from the drone object and assign them to the state variables
     with(drone) {
-        valuesinfo.value = mutableListOf(
-            name, vehicle, provider
-        )
-        valueschar.value = mutableListOf(
-            color, speed, weight, battery, energy, capacity
-        )
-        valuescha.value = mutableListOf(
-            operator, telephone, serial
-        )
-    }
-    if(drone.imgUri != ""){
-        selectedImageUri = drone.imgUri.toUri()
-    }
-    val onImageSelected: (Uri) -> Unit = { uri ->
-        selectedImageUri = uri
-        // Realiza las acciones necesarias con la imagen seleccionada
+        valuesinfo.value = mutableListOf(name, vehicle, provider)
+        valueschar.value = mutableListOf(color, speed, weight, battery, energy, capacity)
+        valuescha.value = mutableListOf(operator, telephone, serial)
     }
 
+    // Selected image URI state
+    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+
+    // Function to handle image selection
+    val onImageSelected: (Uri) -> Unit = { uri ->
+        selectedImageUri = uri
+        // Perform necessary actions with the selected image
+    }
+
+    // Activity result launcher for image selection
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        if(uri != null) {
+        if (uri != null) {
             onImageSelected(uri)
         }
     }
-    Column(Modifier.padding(bottom = padding.calculateBottomPadding())) {
-        Box(
-            Modifier
-                .fillMaxSize()
-                .weight(0.7f)) {
-            LazyColumn(
-                Modifier
-                    .fillMaxSize()
-                    .padding(bottom = 16.dp),
-                state = scrollState
-            ) {
-                item { DropDownMenu(
-                    expanded,
-                    onExpandedChange = { expanded = it },
-                    items,
-                    onDroneSelected = { newItem ->
-                        with(newItem) {
-                            valuesinfo.value = mutableListOf(
-                                name, vehicle, provider
-                            )
-                            valueschar.value = mutableListOf(
-                                color, speed, weight, battery, energy, capacity
-                            )
-                            valuescha.value = mutableListOf(
-                                operator, telephone, serial
-                            )
-                        }
-                        selectedImageUri = Uri.parse(newItem.imgUri)
-                    }) }
-                item { ImagePicker(selectedImageUri, launcher)}
-                item { FieldsMaker("Información principal", fields, valuesinfo ) }
-                item { FieldsMaker("Características de la aeronave", fieldscar,valueschar ) }
-                item { FieldsMaker("Chapa de identificación", fieldsc,valuescha ) }
-                val droneValues = (valuesinfo.value + valueschar.value + valuescha.value)
-                item { EditCreateButtons(navController, droneValues, context, edit, index, selectedImageUri) }
-            }
 
+    Column(Modifier.padding(bottom = padding.calculateBottomPadding())) {
+        Box(Modifier.fillMaxSize().weight(0.7f)) {
+            LazyColumn(
+                Modifier.fillMaxSize().padding(bottom = 16.dp),
+                state = rememberLazyListState()
+            ) {
+                item {
+                    // Drop-down menu for selecting a drone
+                    DropDownMenu(
+                        expanded,
+                        onExpandedChange = { expanded = it },
+                        items = droneViewModel.getDBList(),
+                        onDroneSelected = { newItem ->
+                            with(newItem) {
+                                valuesinfo.value = mutableListOf(name, vehicle, provider)
+                                valueschar.value = mutableListOf(color, speed, weight, battery, energy, capacity)
+                                valuescha.value = mutableListOf(operator, telephone, serial)
+                            }
+                            selectedImageUri = Uri.parse(newItem.imgUri)
+                        }
+                    )
+                }
+                item {
+                    // Image picker for selecting an image
+                    ImagePicker(selectedImageUri, launcher)
+                }
+                item {
+                    // Fields for displaying and editing information
+                    FieldsMaker("Información principal", fields, valuesinfo)
+                }
+                item {
+                    // Fields for displaying and editing characteristics
+                    FieldsMaker("Características de la aeronave", fieldscar, valueschar)
+                }
+                item {
+                    // Fields for displaying and editing identification
+                    FieldsMaker("Chapa de identificación", fieldsc, valuescha)
+                }
+                val droneValues = valuesinfo.value + valueschar.value + valuescha.value
+                item {
+                    // Buttons for editing or creating the drone
+                    EditCreateButtons(navController, droneValues, context, edit, index, selectedImageUri)
+                }
+            }
         }
     }
 }
 
 
+
+/**
+ * Composable function for creating a set of fields.
+ *
+ * @param title The title of the fields.
+ * @param fields The list of field names.
+ * @param fieldval The mutable state holding the values of the fields.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FieldsMaker(title: String,fields: List<String>, fieldval: MutableState<List<String>>){
-
+fun FieldsMaker(title: String, fields: List<String>, fieldval: MutableState<List<String>>) {
     Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
         Text(
             text = title,
@@ -210,22 +253,25 @@ fun FieldsMaker(title: String,fields: List<String>, fieldval: MutableState<List<
             fontSize = 18.sp
         )
         Column(Modifier.fillMaxWidth()) {
-            fields.forEachIndexed { index,field ->
-                Row(modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = field,
-                            fontSize = 18.sp,
-                            modifier = Modifier.weight(1f)
-                        )
+            fields.forEachIndexed { index, field ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = field,
+                        fontSize = 18.sp,
+                        modifier = Modifier.weight(1f)
+                    )
                     TextField(
                         value = fieldval.value[index],
                         onValueChange = { newValue ->
                             fieldval.value = fieldval.value
                                 .toMutableList()
-                                .also { it[index] = newValue } },
+                                .also { it[index] = newValue }
+                        },
                         textStyle = TextStyle(
                             color = Color.Black,
                             fontSize = 11.sp
@@ -247,7 +293,6 @@ fun FieldsMaker(title: String,fields: List<String>, fieldval: MutableState<List<
                             cursorColor = Color.Black,
                         ),
                     )
-
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
@@ -255,6 +300,17 @@ fun FieldsMaker(title: String,fields: List<String>, fieldval: MutableState<List<
     }
 }
 
+/**
+ * Composable function for displaying edit/create buttons.
+ *
+ * @param navController The NavHostController for navigating to different screens.
+ * @param droneValues The list of drone values.
+ * @param context The context for displaying alerts.
+ * @param edit Flag indicating whether the drone is being edited.
+ * @param index The index of the drone being edited.
+ * @param selectedImageUri The selected image URI for the drone.
+ * @param droneViewModel The view model for managing drone data.
+ */
 @Composable
 fun EditCreateButtons(
     navController: NavHostController,
@@ -278,7 +334,7 @@ fun EditCreateButtons(
         operator = droneValues[9]
         telephone = droneValues[10]
         serial = droneValues[11]
-        imgUri = if(selectedImageUri != null) selectedImageUri.toString() else ""
+        imgUri = if (selectedImageUri != null) selectedImageUri.toString() else ""
     }
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -287,23 +343,23 @@ fun EditCreateButtons(
             .padding(horizontal = 16.dp)
     ) {
 
-        // Sign in button
+        // Cancel button
         Button(
             onClick = { navController.navigate(AppScreens.MainScreen.route) },
             shape = RoundedCornerShape(10.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color.White,
-                contentColor =
-                Color(android.graphics.Color.parseColor("#414BB2"))
+                contentColor = Color(android.graphics.Color.parseColor("#414BB2"))
             ),
-            border= BorderStroke(2.dp, Color.LightGray),
+            border = BorderStroke(2.dp, Color.LightGray),
             modifier = Modifier
                 .weight(1f)
                 .padding(end = 8.dp)
-
         ) {
             Text(text = "Cancelar", fontSize = 16.sp)
         }
+
+        // Edit/Create button
         Button(
             onClick = {
                 if (droneData.isNotBlank()) {
@@ -316,7 +372,7 @@ fun EditCreateButtons(
                     droneViewModel.savePersonalDroneData(
                         cloudSave = false,
                         localMode =
-                        if(edit == true)
+                        if (edit == true)
                             DroneViewModel.LocalMode.UPDATE
                         else DroneViewModel.LocalMode.SAVE,
                         localIndex = droneData
@@ -325,26 +381,30 @@ fun EditCreateButtons(
                 } else {
                     showAlert(context)
                 }
-
             },
             shape = RoundedCornerShape(10.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor =
-                Color(android.graphics.Color.parseColor("#0CA789"))
+                containerColor = Color(android.graphics.Color.parseColor("#0CA789"))
             ),
             modifier = Modifier
                 .weight(1f)
                 .padding(start = 8.dp)
         ) {
-            Text(text = if(edit==true)"Editar aeronave" else "Crear aeronave",fontSize = 16.sp)
+            Text(text = if (edit == true) "Editar aeronave" else "Crear aeronave", fontSize = 16.sp)
         }
     }
 }
 
 
+
+/**
+ * Composable function for displaying an image picker.
+ *
+ * @param selectedImageUri The selected image URI.
+ * @param launcher The activity result launcher for selecting an image.
+ */
 @Composable
 fun ImagePicker(selectedImageUri: Uri?, launcher: ActivityResultLauncher<String>) {
-
     Box(
         modifier = Modifier
             .padding(horizontal = 50.dp, vertical = 16.dp)
@@ -363,7 +423,7 @@ fun ImagePicker(selectedImageUri: Uri?, launcher: ActivityResultLauncher<String>
                 }
             when (imagePainter) {
                 is AsyncImagePainter -> {
-                    // La variable `imagePainter` es un ImagePainter
+                    // The `imagePainter` variable is an ImagePainter
                     Image(
                         painter = imagePainter,
                         contentDescription = "Selected image",
@@ -375,7 +435,7 @@ fun ImagePicker(selectedImageUri: Uri?, launcher: ActivityResultLauncher<String>
                 }
 
                 is ImageBitmap -> {
-                    // La variable `imagePainter` es un Bitmap
+                    // The `imagePainter` variable is a Bitmap
                     Image(
                         bitmap = imagePainter.asAndroidBitmap().asImageBitmap(),
                         contentDescription = "Selected image",
@@ -386,21 +446,27 @@ fun ImagePicker(selectedImageUri: Uri?, launcher: ActivityResultLauncher<String>
                     )
                 }
             }
-        }
-        else{
-                // La variable `imagePainter` no es ni un ImagePainter ni un Bitmap
-                Image(
-                    painter = painterResource(R.drawable.image_picker),
-                    contentDescription = "Default image",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .size(150.dp, 250.dp)
-                )
+        } else {
+            // The `imagePainter` variable is neither an ImagePainter nor a Bitmap
+            Image(
+                painter = painterResource(R.drawable.image_picker),
+                contentDescription = "Default image",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .size(150.dp, 250.dp)
+            )
         }
     }
 }
 
+/**
+ * Function for loading a Bitmap from a URI.
+ *
+ * @param context The context.
+ * @param uri The URI of the image.
+ * @return The loaded ImageBitmap.
+ */
 fun loadBitmapFromUri(context: Context, uri: Uri): ImageBitmap {
     val parcelFileDescriptor = context.contentResolver.openFileDescriptor(uri, "r")
     val fileDescriptor = parcelFileDescriptor!!.fileDescriptor
@@ -409,6 +475,15 @@ fun loadBitmapFromUri(context: Context, uri: Uri): ImageBitmap {
     return bitmap.asImageBitmap()
 }
 
+
+/**
+ * Composable function for displaying a dropdown menu with a list of drones.
+ *
+ * @param expanded Whether the dropdown menu is expanded or not.
+ * @param onExpandedChange Callback for when the expanded state of the dropdown menu changes.
+ * @param items The list of Dronedata items to display in the dropdown menu.
+ * @param onDroneSelected Callback for when a drone item is selected from the dropdown menu.
+ */
 @Composable
 fun DropDownMenu(
     expanded: Boolean,
@@ -432,7 +507,6 @@ fun DropDownMenu(
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
-
             Box(
                 Modifier
                     .weight(0.9f)
@@ -463,7 +537,6 @@ fun DropDownMenu(
             )
         }
 
-
         DropdownMenu(
             expanded = expanded,
             onDismissRequest = { onExpandedChange(false) },
@@ -483,10 +556,8 @@ fun DropDownMenu(
                                 text = item.name,
                                 fontSize = 19.sp,
                                 textAlign = TextAlign.Center,
-
                             )
                         }
-
                     },
                     onClick = {
                         selectedItem = item.name
@@ -500,12 +571,18 @@ fun DropDownMenu(
     }
 }
 
-fun showAlert(context: Context){
+/**
+ * Function for showing an alert dialog with an error message in case a drone is not set.
+ *
+ * @param context The context.
+ */
+fun showAlert(context: Context) {
     val builder = AlertDialog.Builder(context)
     builder.setTitle("Error")
     builder.setMessage("Se debe introducir al menos un parámetro para crear un drone")
-    builder.setPositiveButton("Aceptar",null)
+    builder.setPositiveButton("Aceptar", null)
     val dialog: AlertDialog = builder.create()
     dialog.show()
 }
+
 

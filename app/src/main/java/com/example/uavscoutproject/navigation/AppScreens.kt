@@ -1,27 +1,63 @@
 package com.example.uavscoutproject.navigation
 
-//Se definen las diferentes pantallas en las que se pueden navegar
-
-/** Por otro lado, una sealed class (sealed class) es un tipo especial
-de clase que se utiliza para representar una jerarquía de clases relacionadas,
-es decir, una clase sellada puede tener varias subclases, pero todas ellas deben
-estar definidas dentro del mismo archivo Kotlin. La palabra clave sealed significa
-que la clase es cerrada para la extensión fuera del archivo donde se define. Esto
-permite que el compilador verifique que todas las subclases están incluidas y ayuda
-a evitar errores en tiempo de ejecución.
+/**
+ * Sealed class representing different screens in the app.
+ *
+ * @property route The route string associated with the screen.
  */
+sealed class AppScreens(val route: String) {
+    /**
+     * Represents the splash screen.
+     */
+    object SplashScreen : AppScreens("splash_screen")
 
-sealed class AppScreens(val route:String){
-    object SplashScreen: AppScreens("splash_screen")
-    object MainScreen: AppScreens("main_screen")
-    object AuthenticationScreen: AppScreens("authentication_screen")
-    object RegisterScreen: AppScreens("register_screen")
-    object ForgotPasswordScreen: AppScreens("forgot_screen")
-    object DroneMakingScreen: AppScreens("drone_making_screen")
-    object NewsScreen: AppScreens("news_screen")
-    object ProfileScreen: AppScreens("profile_screen")
-    object SettingsScreen: AppScreens("settings_screen")
-    object RuleSetInfoScreen: AppScreens("rulesetinfo_screen")
-    object SupportScreen: AppScreens("support_screen")
+    /**
+     * Represents the main screen.
+     */
+    object MainScreen : AppScreens("main_screen")
 
+    /**
+     * Represents the authentication screen.
+     */
+    object AuthenticationScreen : AppScreens("authentication_screen")
+
+    /**
+     * Represents the register screen.
+     */
+    object RegisterScreen : AppScreens("register_screen")
+
+    /**
+     * Represents the forgot password screen.
+     */
+    object ForgotPasswordScreen : AppScreens("forgot_screen")
+
+    /**
+     * Represents the drone making screen.
+     */
+    object DroneMakingScreen : AppScreens("drone_making_screen")
+
+    /**
+     * Represents the news screen.
+     */
+    object NewsScreen : AppScreens("news_screen")
+
+    /**
+     * Represents the profile screen.
+     */
+    object ProfileScreen : AppScreens("profile_screen")
+
+    /**
+     * Represents the settings screen.
+     */
+    object SettingsScreen : AppScreens("settings_screen")
+
+    /**
+     * Represents the rule set info screen.
+     */
+    object RuleSetInfoScreen : AppScreens("rulesetinfo_screen")
+
+    /**
+     * Represents the support screen.
+     */
+    object SupportScreen : AppScreens("support_screen")
 }

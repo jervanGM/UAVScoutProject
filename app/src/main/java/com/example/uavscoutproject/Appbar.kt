@@ -7,8 +7,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -16,7 +14,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -28,16 +25,24 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+/**
+ * Composable function that displays a customized navigation app bar.
+ *
+ * @param onNavigationIconClick Callback triggered when the navigation icon is clicked.
+ * @param id The resource ID of the navigation icon.
+ * @param buttonColor The color resource ID of the button tint.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NavAppbar(
-    onNavigationIconClick: () ->Unit,
-    id:Int,
-    buttonColor:Int = R.color.nav_button_color
-){
-
+    onNavigationIconClick: () -> Unit,
+    id: Int,
+    buttonColor: Int = R.color.nav_button_color
+) {
+    // Display the top app bar
     TopAppBar(
         title = {
+            // Center-aligned title
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier.fillMaxSize()
@@ -46,17 +51,19 @@ fun NavAppbar(
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    // Display "UAV" text
                     Text(
                         "UAV",
                         fontWeight = FontWeight.Bold,
                         fontSize = 17.sp,
                         color = colorResource(id = R.color.text_blue_Color)
                     )
+                    // Display "Scout" text
                     Text(
                         "Scout",
                         fontWeight = FontWeight.Bold,
                         fontSize = 17.sp,
-                        color = androidx.compose.ui.graphics.Color.Black
+                        color = Color.Black
                     )
                 }
             }
@@ -65,6 +72,7 @@ fun NavAppbar(
             containerColor = Color(android.graphics.Color.parseColor("#559AB6"))
         ),
         navigationIcon = {
+            // Display navigation icon
             Row(
                 horizontalArrangement = Arrangement.Start,
                 verticalAlignment = Alignment.CenterVertically,
@@ -90,14 +98,15 @@ fun NavAppbar(
                     .fillMaxHeight()
                     .padding(end = 16.dp)
             ) {
+                // Display logo image
                 Image(
                     painter = painterResource(id = R.drawable.logo),
                     contentDescription = null,
-                    modifier = Modifier
-                        .size(45.dp)
+                    modifier = Modifier.size(45.dp)
                 )
             }
         }
     )
 }
+
 

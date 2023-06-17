@@ -22,62 +22,83 @@ import com.example.uavscoutproject.mainscreen.home.droneviewmodel.DroneViewModel
 import com.example.uavscoutproject.mainscreen.location.viewmodel.LocationViewModel
 
 
+/**
+ * Composable function for setting up the app navigation using Jetpack Navigation.
+ */
 @Composable
 fun AppNavigation() {
-
     val navController = rememberNavController()
     val droneViewModel: DroneViewModel = viewModel()
     val locationViewModel: LocationViewModel = viewModel()
+
     NavHost(
-            navController = navController,
-            startDestination = AppScreens.SplashScreen.route){
-        composable(AppScreens.SplashScreen.route){
-            SplashScreen(navController, droneViewModel = droneViewModel, locationViewModel = locationViewModel)
+        navController = navController,
+        startDestination = AppScreens.SplashScreen.route
+    ) {
+        // Splash Screen
+        composable(AppScreens.SplashScreen.route) {
+            SplashScreen(
+                navController = navController,
+                droneViewModel = droneViewModel,
+                locationViewModel = locationViewModel
+            )
         }
-        composable(route = AppScreens.MainScreen.route){
-            MainScreen(navController, droneViewModel,locationViewModel)
+        // Main Screen
+        composable(route = AppScreens.MainScreen.route) {
+            MainScreen(navController, droneViewModel, locationViewModel)
         }
-        composable(AppScreens.AuthenticationScreen.route){
+        // Authentication Screen
+        composable(AppScreens.AuthenticationScreen.route) {
             AuthenticationScreen(navController)
         }
-        composable(AppScreens.RegisterScreen.route){
+        // Register Screen
+        composable(AppScreens.RegisterScreen.route) {
             RegisterScreen(navController)
         }
-        composable(AppScreens.ForgotPasswordScreen.route){
+        // Forgot Password Screen
+        composable(AppScreens.ForgotPasswordScreen.route) {
             ForgotPasswordScreen(navController)
         }
-        composable(route = AppScreens.DroneMakingScreen.route +
-                "?edit={edit}&index={index}",
-        arguments = listOf(
-            navArgument("edit"){type = NavType.BoolType},
-            navArgument("index"){type = NavType.IntType}
-        )){backStackEntry ->
+        // Drone Making Screen with edit and index arguments
+        composable(
+            route = AppScreens.DroneMakingScreen.route +
+                    "?edit={edit}&index={index}",
+            arguments = listOf(
+                navArgument("edit") { type = NavType.BoolType },
+                navArgument("index") { type = NavType.IntType }
+            )
+        ) { backStackEntry ->
             val edit = backStackEntry.arguments?.getBoolean("edit")
             val index = backStackEntry.arguments?.getInt("index")
-            DroneMakingScreen(navController,edit,index, droneViewModel)
+            DroneMakingScreen(navController, edit, index, droneViewModel)
         }
-        composable(AppScreens.NewsScreen.route +
-                "?url={url}",
+        // News Screen with url argument
+        composable(
+            AppScreens.NewsScreen.route +
+                    "?url={url}",
             arguments = listOf(
-                navArgument("url"){type = NavType.StringType}
-            )){backStackEntry ->
+                navArgument("url") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
             val url = backStackEntry.arguments?.getString("url")
             requireNotNull(url)
             NewsScreen(navController, url)
-
         }
-        composable(AppScreens.ProfileScreen.route){
+        // Profile Screen
+        composable(AppScreens.ProfileScreen.route) {
             ProfileScreen(navController)
         }
-        composable(AppScreens.SettingsScreen.route){
+        // Settings Screen
+        composable(AppScreens.SettingsScreen.route) {
             SettingsScreen(navController)
         }
-        composable(AppScreens.RuleSetInfoScreen.route){
+        // RuleSet Info Screen
+        composable(AppScreens.RuleSetInfoScreen.route) {
             RuleSetInfoSreen(navController)
         }
-        composable(AppScreens.SupportScreen.route){
+        // Support Screen
+        composable(AppScreens.SupportScreen.route) {
             SupportScreen(navController)
         }
-
     }
 }

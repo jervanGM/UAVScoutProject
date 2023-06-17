@@ -19,40 +19,52 @@ import androidx.navigation.compose.rememberNavController
 import com.example.uavscoutproject.NavAppbar
 import com.example.uavscoutproject.R
 import com.example.uavscoutproject.navigation.AppScreens
-import com.example.uavscoutproject.navigation.bottomBar
+import com.example.uavscoutproject.navigation.BottomBar
 
+/**
+ * Composable function for displaying the news screen.
+ *
+ * @param navController The navigation controller used for navigating between screens.
+ * @param url The URL of the web content to display.
+ */
 @Composable
 fun NewsScreen(navController: NavHostController, url: String = "") {
+    // Initialize scaffold state
     val scaffoldState = rememberScaffoldState()
+
     Scaffold(
         scaffoldState = scaffoldState,
-        topBar = {NavAppbar(
-                    onNavigationIconClick = {
-                        navController.navigate(AppScreens.MainScreen.route)
-                    },
-                    id = R.drawable.ic_back,
-                    buttonColor = R.color.back_button_color
-                )},
-        bottomBar = {bottomBar()},
+        topBar = {
+            // Display the custom navigation app bar with a back button
+            NavAppbar(
+                onNavigationIconClick = {
+                    navController.navigate(AppScreens.MainScreen.route)
+                },
+                id = R.drawable.ic_back,
+                buttonColor = R.color.back_button_color
+            )
+        },
+        bottomBar = {
+            // Display the bottom bar
+            BottomBar()
+        },
         backgroundColor = MaterialTheme.colorScheme.background,
         contentColor = MaterialTheme.colorScheme.onPrimary
-    ){ paddingValues ->
-        WebContent(url,padding = paddingValues)
+    ) { paddingValues ->
+        // Display the web content
+        WebContent(url, padding = paddingValues)
     }
-
 }
 
-@Preview(showBackground = true,  showSystemUi = true)
+/**
+ * Composable function for displaying the web content.
+ *
+ * @param url The URL of the web content to display.
+ * @param padding The padding values for the content.
+ */
 @Composable
-fun NewsScreenPreview(){
-    val navController = rememberNavController()
-    NewsScreen(navController)
-}
-
-
-@Composable
-fun WebContent(url: String, padding: PaddingValues){
-    Column( // (2)
+fun WebContent(url: String, padding: PaddingValues) {
+    Column(
         modifier = Modifier.padding(bottom = padding.calculateBottomPadding()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -69,4 +81,14 @@ fun WebContent(url: String, padding: PaddingValues){
             it.loadUrl(url)
         })
     }
+}
+
+/**
+ * Composable function for previewing the NewsScreen.
+ */
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun NewsScreenPreview() {
+    val navController = rememberNavController()
+    NewsScreen(navController)
 }

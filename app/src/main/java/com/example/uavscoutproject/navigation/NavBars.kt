@@ -22,67 +22,79 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.uavscoutproject.R
 
+/**
+ * Composable function representing the back navigation bar.
+ *
+ * @param navController The [NavHostController] used for navigation.
+ */
 @Composable
-fun backNavBar(navController: NavHostController) {
-        Box(
+fun BackNavBar(navController: NavHostController) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color(android.graphics.Color.parseColor("#559AB6")))
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color(android.graphics.Color.parseColor("#559AB6")))
+                .padding(horizontal = 20.dp, vertical = 4.dp)
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
+            // Back button
+            IconButton(
+                onClick = { navController.navigate(AppScreens.MainScreen.route) },
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 4.dp)
+                    .size(32.dp)
             ) {
-                IconButton(
-                    onClick = { navController.navigate(AppScreens.MainScreen.route) },
+                Icon(
+                    painter = painterResource(R.drawable.ic_back),
+                    tint = Color(android.graphics.Color.parseColor("#305471")),
                     modifier = Modifier
-                        .size(32.dp)
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_back),
-                        tint = Color(android.graphics.Color.parseColor("#305471")),
-                        modifier = Modifier
-                            .size(32.dp),
-                        contentDescription = null
-                    )
-                }
-
-                Box(
-                    modifier = Modifier.padding(start = 12.dp)
-                ) {
-                    Row(
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            "UAV",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 17.sp,
-                            color = Color(android.graphics.Color.parseColor(R.color.text_blue_Color.toString()))
-                        )
-                        Text(
-                            "Scout",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 17.sp,
-                            color = androidx.compose.ui.graphics.Color.Black
-                        )
-                    }
-                }
-                Image(
-                    painter = painterResource(id = R.drawable.logo),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(45.dp)
+                        .size(32.dp),
+                    contentDescription = null
                 )
             }
+
+            // Title
+            Box(
+                modifier = Modifier.padding(start = 12.dp)
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        "UAV",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 17.sp,
+                        color = Color(android.graphics.Color.parseColor(R.color.text_blue_Color.toString()))
+                    )
+                    Text(
+                        "Scout",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 17.sp,
+                        color = Color.Black
+                    )
+                }
+            }
+
+            // Logo
+            Image(
+                painter = painterResource(id = R.drawable.logo),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(45.dp)
+            )
         }
+    }
 }
 
+/**
+ * Composable function representing the bottom navigation bar.
+ */
 @Composable
-fun bottomBar(){
+fun BottomBar() {
     Box(
         Modifier
             .fillMaxWidth()

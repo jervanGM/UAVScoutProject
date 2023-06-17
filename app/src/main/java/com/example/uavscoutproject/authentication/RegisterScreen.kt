@@ -43,23 +43,37 @@ import androidx.navigation.compose.rememberNavController
 import com.example.uavscoutproject.R
 import com.example.uavscoutproject.navigation.AppScreens
 
+/**
+ * Composable function for the Register screen.
+ *
+ * @param navController The navigation controller used to navigate between screens.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterScreen(navController: NavHostController) {
     Register(navController)
 }
 
+/**
+ * Composable function for the Register UI.
+ *
+ * @param navController The navigation controller used to navigate between screens.
+ * @param viewModel The view model for the authentication screen.
+ */
 @ExperimentalMaterial3Api
 @Composable
-fun Register(navController: NavHostController,
-             viewModel: AuthenticationScreenViewModel = androidx.lifecycle.viewmodel.compose.viewModel()) {
+fun Register(
+    navController: NavHostController,
+    viewModel: AuthenticationScreenViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+) {
     val email = remember { mutableStateOf("") }
     val password = remember { mutableStateOf("") }
-    val password_repeat = remember { mutableStateOf("") }
+    val passwordRepeat = remember { mutableStateOf("") }
     val fontSize = 17.sp
     val context = LocalContext.current
 
     Box(modifier = Modifier.fillMaxSize()) {
+        // Background Image
         Image(
             painter = painterResource(id = R.drawable.inicio_sesion),
             contentDescription = null,
@@ -72,6 +86,7 @@ fun Register(navController: NavHostController,
                 .padding(18.dp)
         ) {
             Spacer(modifier = Modifier.height(30.dp))
+            // Logo Image
             Image(
                 painter = painterResource(id = R.drawable.logo),
                 contentDescription = "Logo UAVScout",
@@ -83,6 +98,7 @@ fun Register(navController: NavHostController,
                 contentAlignment = Alignment.TopCenter,
                 modifier = Modifier.fillMaxWidth()
             ) {
+                // Title
                 Row(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier.padding(bottom = 40.dp)
@@ -97,7 +113,7 @@ fun Register(navController: NavHostController,
                         "Scout",
                         fontWeight = FontWeight.Bold,
                         fontSize = fontSize,
-                        color = androidx.compose.ui.graphics.Color.Black
+                        color = Color.Black
                     )
                 }
                 Column(
@@ -109,7 +125,7 @@ fun Register(navController: NavHostController,
                         "Registrarse",
                         fontWeight = FontWeight.Bold,
                         fontSize = 32.sp,
-                        color = androidx.compose.ui.graphics.Color.White
+                        color = Color.White
                     )
                 }
             }
@@ -124,10 +140,10 @@ fun Register(navController: NavHostController,
                     onValueChange = { email.value = it },
                     shape = RoundedCornerShape(10.dp),
                     colors = TextFieldDefaults.textFieldColors(
-                        containerColor = androidx.compose.ui.graphics.Color.White,
+                        containerColor = Color.White,
                         focusedIndicatorColor =
                         Color(android.graphics.Color.parseColor("#414BB2")),
-                        unfocusedIndicatorColor = androidx.compose.ui.graphics.Color.Gray,
+                        unfocusedIndicatorColor = Color.Gray,
                         focusedLabelColor =
                         Color(android.graphics.Color.parseColor("#414BB2"))
                     ),
@@ -136,7 +152,7 @@ fun Register(navController: NavHostController,
                         keyboardType = KeyboardType.Email,
                         imeAction = ImeAction.Next
                     ),
-                    textStyle = TextStyle(color = androidx.compose.ui.graphics.Color.Black),
+                    textStyle = TextStyle(color = Color.Black),
                     modifier = Modifier
                         .fillMaxWidth(fraction = 0.9f)
                         .padding(bottom = 16.dp)
@@ -154,10 +170,10 @@ fun Register(navController: NavHostController,
                     onValueChange = { password.value = it },
                     shape = RoundedCornerShape(10.dp),
                     colors = TextFieldDefaults.textFieldColors(
-                        containerColor = androidx.compose.ui.graphics.Color.White,
+                        containerColor = Color.White,
                         focusedIndicatorColor =
                         Color(android.graphics.Color.parseColor("#414BB2")),
-                        unfocusedIndicatorColor = androidx.compose.ui.graphics.Color.Gray,
+                        unfocusedIndicatorColor = Color.Gray,
                         focusedLabelColor =
                         Color(android.graphics.Color.parseColor("#414BB2"))
                     ),
@@ -167,20 +183,21 @@ fun Register(navController: NavHostController,
                         keyboardType = KeyboardType.Password,
                         imeAction = ImeAction.Done
                     ),
-                    textStyle = TextStyle(color = androidx.compose.ui.graphics.Color.Black),
+                    textStyle = TextStyle(color = Color.Black),
                     modifier = Modifier
                         .fillMaxWidth(fraction = 0.9f)
                         .padding(bottom = 16.dp)
                 )
             }
+
             // Repeat Password field
             Box(
                 contentAlignment = Alignment.TopCenter,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 OutlinedTextField(
-                    value = password_repeat.value,
-                    onValueChange = { password_repeat.value = it },
+                    value = passwordRepeat.value,
+                    onValueChange = { passwordRepeat.value = it },
                     shape = RoundedCornerShape(10.dp),
                     colors = TextFieldDefaults.textFieldColors(
                         containerColor = Color.White,
@@ -202,19 +219,21 @@ fun Register(navController: NavHostController,
                         .padding(bottom = 16.dp)
                 )
             }
+
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()
             ) {
-
-                // cancel button
+                // Cancel button
                 Button(
-                    onClick = { navController.navigate(AppScreens.AuthenticationScreen.route) {
-                                anim {
-                                    exit = android.R.anim.fade_out
-                                    popExit = android.R.anim.fade_out
-                                }
-                                } },
+                    onClick = {
+                        navController.navigate(AppScreens.AuthenticationScreen.route) {
+                            anim {
+                                exit = android.R.anim.fade_out
+                                popExit = android.R.anim.fade_out
+                            }
+                        }
+                    },
                     shape = RoundedCornerShape(10.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color.White,
@@ -225,24 +244,26 @@ fun Register(navController: NavHostController,
                     modifier = Modifier
                         .weight(1f)
                         .padding(end = 8.dp)
-
                 ) {
                     Text(text = "Cancelar")
                 }
+
                 // Sign up button
                 Button(
-                    onClick = { viewModel.registerEmailPassword(email.value, password.value, password_repeat.value,context){
-                                    navController.popBackStack()
-                                    navController.navigate(AppScreens.MainScreen.route) {
-                                        popUpTo(0)
-                                        launchSingleTop = true
-                                        anim {
-                                            exit = android.R.anim.fade_out
-                                            popExit = android.R.anim.fade_out
-                                        }
-                                    }
-                                    viewModel.setLoggedIn(email.value,password.value)
-                                } },
+                    onClick = {
+                        viewModel.registerEmailPassword(email.value, password.value, passwordRepeat.value, context) {
+                            navController.popBackStack()
+                            navController.navigate(AppScreens.MainScreen.route) {
+                                popUpTo(0)
+                                launchSingleTop = true
+                                anim {
+                                    exit = android.R.anim.fade_out
+                                    popExit = android.R.anim.fade_out
+                                }
+                            }
+                            viewModel.setLoggedIn(email.value, password.value)
+                        }
+                    },
                     shape = RoundedCornerShape(10.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor =
@@ -256,10 +277,12 @@ fun Register(navController: NavHostController,
                 }
             }
         }
-
     }
 }
 
+/**
+ * Preview function for the Register screen.
+ */
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun RegisterScreenPreview(){

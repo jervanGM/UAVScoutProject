@@ -31,33 +31,45 @@ import androidx.navigation.compose.rememberNavController
 import com.example.uavscoutproject.NavAppbar
 import com.example.uavscoutproject.R
 import com.example.uavscoutproject.navigation.AppScreens
-import com.example.uavscoutproject.navigation.bottomBar
+import com.example.uavscoutproject.navigation.BottomBar
 import com.example.uavscoutproject.preferences.MyPreferences
 
+/**
+ * Composable function that represents the Settings screen.
+ *
+ * @param navController The [NavHostController] used for navigation.
+ */
 @Composable
-fun SettingsScreen(navController: NavHostController){
+fun SettingsScreen(navController: NavHostController) {
     val scaffoldState = rememberScaffoldState()
     val context = LocalContext.current
+
     Scaffold(
         scaffoldState = scaffoldState,
         topBar = {
             NavAppbar(
-            onNavigationIconClick = {
-                navController.navigate(AppScreens.MainScreen.route)
-            },
-            id = R.drawable.ic_back,
-            buttonColor = R.color.back_button_color
-        )
+                onNavigationIconClick = {
+                    navController.navigate(AppScreens.MainScreen.route)
+                },
+                id = R.drawable.ic_back,
+                buttonColor = R.color.back_button_color
+            )
         },
-        bottomBar = { bottomBar() },
+        bottomBar = { BottomBar() },
         backgroundColor = MaterialTheme.colorScheme.background
-    ){ paddingValues ->
-        Settings(padding = paddingValues,context)
+    ) { paddingValues ->
+        Settings(padding = paddingValues, context)
     }
 }
 
+/**
+ * Composable function that represents the content of the Settings screen.
+ *
+ * @param padding The padding values to apply to the content.
+ * @param context The [Context] used for retrieving resources and preferences.
+ */
 @Composable
-fun Settings(padding: PaddingValues, context:Context) {
+fun Settings(padding: PaddingValues, context: Context) {
     val settings = listOf(
         Pair("Guardado local", "isLocal"),
         Pair("Modo oscuro", "darkMode"),
@@ -65,27 +77,33 @@ fun Settings(padding: PaddingValues, context:Context) {
         Pair("Activar notificaciones", "activeNotifications")
     )
 
-    Column(
-        modifier = Modifier.padding(bottom = padding.calculateBottomPadding())
-    ) {
-        Box(modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 16.dp),
+    Column(modifier = Modifier.padding(bottom = padding.calculateBottomPadding())) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 16.dp),
             contentAlignment = Alignment.Center
         ) {
-            Text(text ="Ajustes",
+            Text(
+                text = "Ajustes",
                 fontSize = 17.sp,
                 fontWeight = FontWeight.Bold
             )
         }
         LazyColumn {
-            items(settings.size){
-                SettingItem(settings[it],context)
+            items(settings.size) {
+                SettingItem(settings[it], context)
             }
         }
     }
 }
 
+/**
+ * Composable function that represents a single setting item.
+ *
+ * @param setting The pair containing the setting title and key.
+ * @param context The [Context] used for retrieving preferences and displaying toasts.
+ */
 @Composable
 fun SettingItem(setting: Pair<String, String>, context: Context) {
     val preferences = MyPreferences(LocalContext.current)
@@ -111,8 +129,8 @@ fun SettingItem(setting: Pair<String, String>, context: Context) {
                 Toast.makeText(
                     context,
                     "Reinicia la aplicación para aplicar los cambios",
-                    Toast.LENGTH_LONG )
-                    .show()
+                    Toast.LENGTH_LONG
+                ).show()
             },
             modifier = Modifier.padding(end = 16.dp)
         )
@@ -120,12 +138,14 @@ fun SettingItem(setting: Pair<String, String>, context: Context) {
     Divider()
 }
 
-
-
+/**
+ * Preview function for the Settings screen.
+ */
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun SettingsScreenPreview(){
+fun SettingsScreenPreview() {
     val navController = rememberNavController()
     SettingsScreen(navController)
 }
+
 

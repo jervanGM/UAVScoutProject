@@ -1,9 +1,7 @@
 package com.example.uavscoutproject.authentication
 
 
-import android.app.Activity
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
@@ -55,41 +53,47 @@ import com.example.uavscoutproject.navigation.AppScreens
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
-import com.google.firebase.auth.GoogleAuthCredential
 import com.google.firebase.auth.GoogleAuthProvider
-import java.lang.Exception
 
+/**
+ * Composable function that represents the Authentication screen.
+ *
+ * @param navController The [NavHostController] used for navigation.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AuthenticationScreen(navController: NavHostController) {
-    //val activity = LocalContext.current as Activity
-
-    // Fijar orientación a modo vertical. Habilitar en version final
-    //activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-
     Authentication(navController)
 }
 
+/**
+ * Composable function that represents the content of the Authentication screen.
+ *
+ * @param navController The [NavHostController] used for navigation.
+ * @param viewModel The view model for the Authentication screen.
+ */
 @ExperimentalMaterial3Api
 @Composable
-fun Authentication(navController: NavHostController,
-                   viewModel: AuthenticationScreenViewModel = androidx.lifecycle.viewmodel.compose.viewModel()) {
+fun Authentication(
+    navController: NavHostController,
+    viewModel: AuthenticationScreenViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+) {
     val email = remember { mutableStateOf("") }
     val password = remember { mutableStateOf("") }
     val fontSize = 17.sp
     val iconSize = 19
     val context = LocalContext.current
     val launcher = rememberLauncherForActivityResult(
-        contract =ActivityResultContracts.StartActivityForResult()
+        contract = ActivityResultContracts.StartActivityForResult()
     ) {
         val task = GoogleSignIn.getSignedInAccountFromIntent(it.data)
-        try{
+        try {
             val account = task.getResult(ApiException::class.java)
             email.value = account?.email.toString()
-            viewModel.setLoggedIn(email.value,"GoogleSign")
+            viewModel.setLoggedIn(email.value, "GoogleSign")
             email.value = ""
-            val credential = GoogleAuthProvider.getCredential(account.idToken,null)
-            viewModel.signInWithGoogle(credential,context){
+            val credential = GoogleAuthProvider.getCredential(account.idToken, null)
+            viewModel.signInWithGoogle(credential, context) {
                 navController.clearBackStack(AppScreens.MainScreen.route)
                 navController.navigate(AppScreens.MainScreen.route) {
                     popUpTo(0)
@@ -100,9 +104,8 @@ fun Authentication(navController: NavHostController,
                     }
                 }
             }
-        }
-        catch (ex:Exception){
-            Log.d("FalloAuth","GoogleSignIn failure")
+        } catch (ex: Exception) {
+            Log.d("AuthFailure", "GoogleSignIn failure")
         }
     }
     Box(modifier = Modifier.fillMaxSize()) {
@@ -120,7 +123,7 @@ fun Authentication(navController: NavHostController,
             Spacer(modifier = Modifier.height(30.dp))
             Image(
                 painter = painterResource(id = R.drawable.logo),
-                contentDescription = "Logo UAVScout",
+                contentDescription = "UAVScout Logo",
                 modifier = Modifier
                     .size(140.dp, 140.dp)
                     .align(Alignment.CenterHorizontally)
@@ -152,7 +155,7 @@ fun Authentication(navController: NavHostController,
                     modifier = Modifier.padding(top = 30.dp)
                 ) {
                     Text(
-                        "Iniciar Sesión",
+                        "Sign In",
                         fontWeight = FontWeight.Bold,
                         fontSize = 32.sp,
                         color = Color.White
@@ -160,93 +163,90 @@ fun Authentication(navController: NavHostController,
                 }
             }
 
-                // Email field
-                Box(
-                    contentAlignment = Alignment.TopCenter,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    OutlinedTextField(
-                        value = email.value,
-                        onValueChange = { email.value = it },
-                        shape = RoundedCornerShape(10.dp),
-                        colors = TextFieldDefaults.textFieldColors(
-                            containerColor = Color.White,
-                            focusedIndicatorColor =
-                            Color(android.graphics.Color.parseColor("#414BB2")),
-                            unfocusedIndicatorColor = Color.Gray,
-                            focusedLabelColor =
-                            Color(android.graphics.Color.parseColor("#414BB2"))
-                        ),
-                        label = { Text("Email") },
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Email,
-                            imeAction = ImeAction.Next
-                        ),
-                        textStyle = TextStyle(color = Color.Black),
-                        modifier = Modifier
-                            .fillMaxWidth(fraction = 0.9f)
-                            .padding(bottom = 16.dp),
-                        singleLine = true
+            // Email field
+            Box(
+                contentAlignment = Alignment.TopCenter,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                OutlinedTextField(
+                    value = email.value,
+                    onValueChange = { email.value = it },
+                    shape = RoundedCornerShape(10.dp),
+                    colors = TextFieldDefaults.textFieldColors(
+                        containerColor = Color.White,
+                        focusedIndicatorColor = Color(android.graphics.Color.parseColor("#414BB2")),
+                        unfocusedIndicatorColor = Color.Gray,
+                        focusedLabelColor = Color(android.graphics.Color.parseColor("#414BB2"))
+                    ),
+                    label = { Text("Email") },
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Email,
+                        imeAction = ImeAction.Next
+                    ),
+                    textStyle = TextStyle(color = Color.Black),
+                    modifier = Modifier
+                        .fillMaxWidth(fraction = 0.9f)
+                        .padding(bottom = 16.dp),
+                    singleLine = true
+                )
+            }
 
-                    )
-                }
-
-                // Password field
-                Box(
-                    contentAlignment = Alignment.TopCenter,
-                    modifier = Modifier.fillMaxWidth()
+            // Password field
+            Box(
+                contentAlignment = Alignment.TopCenter,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                OutlinedTextField(
+                    value = password.value,
+                    onValueChange = { password.value = it },
+                    shape = RoundedCornerShape(10.dp),
+                    colors = TextFieldDefaults.textFieldColors(
+                        containerColor = Color.White,
+                        focusedIndicatorColor = Color(android.graphics.Color.parseColor("#414BB2")),
+                        unfocusedIndicatorColor = Color.Gray,
+                        focusedLabelColor = Color(android.graphics.Color.parseColor("#414BB2"))
+                    ),
+                    label = { Text("Password") },
+                    visualTransformation = PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Password,
+                        imeAction = ImeAction.Done
+                    ),
+                    textStyle = TextStyle(color = Color.Black),
+                    modifier = Modifier
+                        .fillMaxWidth(fraction = 0.9f)
+                        .padding(bottom = 16.dp),
+                    singleLine = true
+                )
+            }
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                // Sign up button
+                Button(
+                    onClick = {
+                        navController.navigate(AppScreens.RegisterScreen.route) {
+                            anim {
+                                exit = android.R.anim.fade_out
+                                popExit = android.R.anim.fade_out
+                            }
+                        }
+                    },
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(android.graphics.Color.parseColor("#0CA789"))
+                    ),
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = 8.dp)
                 ) {
-                    OutlinedTextField(
-                        value = password.value,
-                        onValueChange = { password.value = it },
-                        shape = RoundedCornerShape(10.dp),
-                        colors = TextFieldDefaults.textFieldColors(
-                            containerColor = Color.White,
-                            focusedIndicatorColor =
-                            Color(android.graphics.Color.parseColor("#414BB2")),
-                            unfocusedIndicatorColor = Color.Gray,
-                            focusedLabelColor =
-                            Color(android.graphics.Color.parseColor("#414BB2"))
-                        ),
-                        label = { Text("Password") },
-                        visualTransformation = PasswordVisualTransformation(),
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Password,
-                            imeAction = ImeAction.Done
-                        ),
-                        textStyle = TextStyle(color = Color.Black),
-                        modifier = Modifier
-                            .fillMaxWidth(fraction = 0.9f)
-                            .padding(bottom = 16.dp),
-                        singleLine = true
-                    )
+                    Text(text = "Sign Up")
                 }
-                Row(
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    // Sign up button
-                    Button(
-                        onClick = { navController.navigate(AppScreens.RegisterScreen.route) {
-                                        anim {
-                                            exit = android.R.anim.fade_out
-                                            popExit = android.R.anim.fade_out
-                                        }
-                                   } },
-                        shape = RoundedCornerShape(10.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor =
-                            Color(android.graphics.Color.parseColor("#0CA789"))
-                        ),
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(end = 8.dp)
-                    ) {
-                        Text(text = "Registrarse")
-                    }
-                    // Sign in button
-                    Button(
-                        onClick = { viewModel.signInEmailPassword(email.value,password.value,context){
+                // Sign in button
+                Button(
+                    onClick = {
+                        viewModel.signInEmailPassword(email.value, password.value, context) {
                             navController.popBackStack()
                             navController.navigate(AppScreens.MainScreen.route) {
                                 popUpTo(0)
@@ -255,37 +255,34 @@ fun Authentication(navController: NavHostController,
                                     exit = android.R.anim.fade_out
                                     popExit = android.R.anim.fade_out
                                 }
-
                             }
-                            viewModel.setLoggedIn(email.value,password.value)
-                        } },
-                        shape = RoundedCornerShape(10.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor =Color.White,
-                            contentColor =
-                            Color(android.graphics.Color.parseColor("#414BB2"))
-                        ),
-                        border=BorderStroke(2.dp, Color.LightGray),
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(start = 8.dp)
-
-                    ) {
-                        Text(text = "Acceder")
-                    }
+                            viewModel.setLoggedIn(email.value, password.value)
+                        }
+                    },
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.White,
+                        contentColor = Color(android.graphics.Color.parseColor("#414BB2"))
+                    ),
+                    border = BorderStroke(2.dp, Color.LightGray),
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(start = 8.dp)
+                ) {
+                    Text(text = "Sign In")
                 }
+            }
             // Forgot password text
             ClickableText(
-                text = AnnotatedString("¿Has olvidado la contraseña?"),
+                text = AnnotatedString("Forgot your password?"),
                 style = MaterialTheme.typography.bodyMedium.merge(
                     TextStyle(
-                        color=Color(android.graphics.Color.parseColor("#3F53D9")),
+                        color = Color(android.graphics.Color.parseColor("#3F53D9")),
                         fontWeight = FontWeight.Bold,
                         fontSize = 17.sp
                     )
                 ),
-                modifier = Modifier
-                    .padding(vertical = 8.dp),
+                modifier = Modifier.padding(vertical = 8.dp),
                 onClick = {
                     navController.navigate(AppScreens.ForgotPasswordScreen.route) {
                         anim {
@@ -304,43 +301,41 @@ fun Authentication(navController: NavHostController,
             ) {
                 Button(
                     onClick = {
-                                val opciones = GoogleSignInOptions.Builder(
-                                    GoogleSignInOptions.DEFAULT_SIGN_IN
-                                ).requestIdToken(context.getString(R.string.default_web_client_id))
-                                 .requestEmail()
-                                 .build()
-                                val googleClient =  GoogleSignIn.getClient(context,opciones)
-                                googleClient.signOut()
-                                launcher.launch(googleClient.signInIntent)
-                              },
+                        val opciones = GoogleSignInOptions.Builder(
+                            GoogleSignInOptions.DEFAULT_SIGN_IN
+                        ).requestIdToken(context.getString(R.string.default_web_client_id))
+                            .requestEmail()
+                            .build()
+                        val googleClient = GoogleSignIn.getClient(context, opciones)
+                        googleClient.signOut()
+                        launcher.launch(googleClient.signInIntent)
+                    },
                     shape = RoundedCornerShape(10.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color.White,
-                        contentColor =
-                        Color(android.graphics.Color.parseColor("#414BB2"))
+                        contentColor = Color(android.graphics.Color.parseColor("#414BB2"))
                     ),
                     border = BorderStroke(2.dp, Color.LightGray),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(text = "Iniciar sesión con Google")
+                    Text(text = "Sign In with Google")
                     Spacer(modifier = Modifier.width(8.dp))
                     Icon(
                         painter = painterResource(id = R.drawable.ic_google),
-                        contentDescription = "Iniciar sesión con Google",
+                        contentDescription = "Sign In with Google",
                         tint = Color.Unspecified,
                         modifier = Modifier.size(iconSize.dp)
                     )
                 }
             }
-
         }
-
     }
 }
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun AuthenticationSreenPreview(){
+fun AuthenticationSreenPreview() {
     val navController = rememberNavController()
     AuthenticationScreen(navController)
 }
+

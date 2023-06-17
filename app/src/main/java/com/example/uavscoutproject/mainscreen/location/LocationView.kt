@@ -57,27 +57,44 @@ enum class MarkerState {
     MARK,
     STABLISH_MARK
 }
+/**
+ * Composable function for displaying the LocationView.
+ *
+ * @param locationViewModel The view model for handling location-related data and operations.
+ */
 @Composable
 fun LocationView(locationViewModel: LocationViewModel = viewModel()) {
+    // Retrieve location items list from the view model
     val itemsList = locationViewModel.alterLocationList
+
+    // Create scroll state for the LazyColumn
     val scrollState = rememberLazyListState()
+
+    // Get the current context
     val context = LocalContext.current
+
+    // Define mutable state for marker state and delete location
     val markerState = remember { mutableStateOf(MarkerState.NO_MARK) }
     val deleteLocationIndex = remember { mutableStateOf(0) }
     val deleteLocation = remember { mutableStateOf(false) }
+
     Column {
-       Box(
-           Modifier
-               .fillMaxWidth()
-               .weight(1.5f)
+        // MapView composable wrapped in a Box
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .weight(1.5f)
         ) {
             MapView(
                 modifier = Modifier,
                 deleteLocation = deleteLocation,
                 deleteLocationIndex = deleteLocationIndex,
                 isMarkerSet = markerState,
-                viewModel = locationViewModel)
+                viewModel = locationViewModel
+            )
         }
+
+        // Box containing the rest of the content
         Box(
             Modifier
                 .fillMaxWidth()
@@ -85,6 +102,7 @@ fun LocationView(locationViewModel: LocationViewModel = viewModel()) {
                 .padding(vertical = 4.dp)
         ) {
             Column {
+                // GeobuttonsRow composable
                 GeobuttonsRow(locationViewModel, onMarkerChange = {
                     when (markerState.value) {
                         MarkerState.NO_MARK -> {
@@ -97,9 +115,9 @@ fun LocationView(locationViewModel: LocationViewModel = viewModel()) {
                             markerState.value = MarkerState.NO_MARK
                         }
                     }
+                })
 
-                }
-                )
+                // Box containing text labels for establishing route and distance
                 Box(
                     Modifier
                         .fillMaxWidth()
@@ -117,28 +135,34 @@ fun LocationView(locationViewModel: LocationViewModel = viewModel()) {
                         color = Color(android.graphics.Color.parseColor("#808080"))
                     )
                 }
+
+                // LazyColumn for displaying location items
                 LazyColumn(state = scrollState) {
                     items(itemsList.size) { index ->
                         var success: Boolean
+
                         LocationItem(
                             index = index,
                             item = itemsList.get(index),
-                            onItemEdited = { i, s -> itemsList[i] = s
-                                           Log.d("LOCATION","${locationViewModel.alterLocationList.size}")},
+                            onItemEdited = { i, s ->
+                                itemsList[i] = s
+                                Log.d("LOCATION", "${locationViewModel.alterLocationList.size}")
+                            },
                             onItemChanged = { i, s ->
                                 success = locationViewModel.updatePositionAndCheckDistance(
                                     context,
                                     i,
-                                    s.title
-                                    ,s.position
+                                    s.title,
+                                    s.position
                                 )
-                                if(success) locationViewModel.requestAirSpace(context, s)},
+                                if (success) locationViewModel.requestAirSpace(context, s)
+                            },
                             onItemRemoved = { i ->
                                 itemsList.removeAt(i)
                                 deleteLocation.value = true
                                 deleteLocationIndex.value = i
-                                            },
-                            onItemAdded = { itemsList.add(GeocodeItem("Init", Position(null,null))) },
+                            },
+                            onItemAdded = { itemsList.add(GeocodeItem("Init", Position(null, null))) },
                             canDelete = (itemsList.size > 1),
                             context,
                             locationViewModel = locationViewModel
@@ -150,22 +174,29 @@ fun LocationView(locationViewModel: LocationViewModel = viewModel()) {
     }
 }
 
-
-
-
+/**
+ * Composable function for previewing the LocationView.
+ */
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun LocationPreview(){
+fun LocationPreview() {
     LocationView()
 }
 
+/**
+ * Composable function for rendering the geobuttons row.
+ *
+ * @param locationViewModel The view model for handling location-related data and operations.
+ * @param onMarkerChange Callback function for handling marker changes.
+ */
 @Composable
 fun GeobuttonsRow(
     locationViewModel: LocationViewModel,
-    onMarkerChange: () -> Unit) {
+    onMarkerChange: () -> Unit
+) {
     val context = LocalContext.current
-    Row(horizontalArrangement = Arrangement.SpaceBetween,
-        modifier = Modifier.padding(top = 8.dp)) {
+
+    Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.padding(top = 8.dp)) {
         Box(
             modifier = Modifier
                 .weight(0.3f)
@@ -175,7 +206,7 @@ fun GeobuttonsRow(
             Row(
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically,
-                modifier= Modifier
+                modifier = Modifier
                     .height(48.dp)
                     .border(2.dp, Color.LightGray, shape = RoundedCornerShape(4.dp))
             ) {
@@ -191,15 +222,15 @@ fun GeobuttonsRow(
                     fontSize = 14.sp,
                     color = Color.Black,
                     modifier = Modifier.padding(8.dp)
-
                 )
             }
         }
+
         Box(
             modifier = Modifier
                 .weight(0.4f)
                 .clickable(onClick = {
-                    locationViewModel.stablishRoute()
+                    locationViewModel.establishRoute()
                     locationViewModel.saveRouteData()
                 }),
             contentAlignment = Alignment.Center
@@ -207,7 +238,7 @@ fun GeobuttonsRow(
             Row(
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically,
-                modifier= Modifier
+                modifier = Modifier
                     .height(48.dp)
                     .border(2.dp, Color.LightGray, shape = RoundedCornerShape(4.dp))
             ) {
@@ -226,6 +257,7 @@ fun GeobuttonsRow(
                 )
             }
         }
+
         Box(
             modifier = Modifier
                 .weight(0.3f)
@@ -235,7 +267,7 @@ fun GeobuttonsRow(
             Row(
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically,
-                modifier= Modifier
+                modifier = Modifier
                     .height(48.dp)
                     .border(2.dp, Color.LightGray, shape = RoundedCornerShape(4.dp))
                     .wrapContentSize()
@@ -258,6 +290,19 @@ fun GeobuttonsRow(
     }
 }
 
+/**
+ * Composable function for rendering a location item.
+ *
+ * @param index The index of the item.
+ * @param item The GeocodeItem representing the location.
+ * @param onItemEdited Callback function for handling item edit.
+ * @param onItemChanged Callback function for handling item change.
+ * @param onItemRemoved Callback function for handling item removal.
+ * @param onItemAdded Callback function for handling item addition.
+ * @param canDelete Flag indicating whether the item can be deleted.
+ * @param context The Android Context.
+ * @param locationViewModel The view model for handling location-related data and operations.
+ */
 @Composable
 fun LocationItem(
     index: Int,
@@ -268,7 +313,7 @@ fun LocationItem(
     onItemAdded: () -> Unit,
     canDelete: Boolean,
     context: Context,
-    locationViewModel: LocationViewModel = viewModel(),
+    locationViewModel: LocationViewModel = viewModel()
 ) {
     Box(
         Modifier
@@ -284,10 +329,9 @@ fun LocationItem(
         ) {
             IconButton(
                 onClick = {
-                    if(locationViewModel.alterLocationList.last().title != "Init") {
+                    if (locationViewModel.alterLocationList.last().title != "Init") {
                         onItemAdded()
-                    }
-                    else{
+                    } else {
                         AlertDialog.Builder(context)
                             .setTitle("Localización previa incorrecta")
                             .setMessage("Se debe incluir una posición previamente")
@@ -305,19 +349,18 @@ fun LocationItem(
             }
 
             LocationAutocomplete(
-                searchText = if(item.title == "Init") "" else item.title,
+                searchText = if (item.title == "Init") "" else item.title,
                 onSearchTextChanged = { newValue ->
-                    onItemEdited(index, GeocodeItem(newValue,Position(null,null)))
+                    onItemEdited(index, GeocodeItem(newValue, Position(null, null)))
                 },
                 onAddressSelected = { suggestion ->
                     onItemChanged(
                         index,
                         GeocodeItem(
                             suggestion.title,
-                            Position(suggestion.position.lat,suggestion.position.lng)
+                            Position(suggestion.position.lat, suggestion.position.lng)
                         )
                     )
-
                 },
                 modifier = Modifier.weight(1.5f),
                 context = context,
@@ -339,7 +382,7 @@ fun LocationItem(
                         "$it m"
                     }
                 }
-                Text(text = distance, fontSize = 14.sp, softWrap = false )
+                Text(text = distance, fontSize = 14.sp, softWrap = false)
             }
 
             IconButton(
@@ -360,7 +403,16 @@ fun LocationItem(
     }
 }
 
-
+/**
+ * Composable function for rendering the location autocomplete field.
+ *
+ * @param searchText The current search text.
+ * @param onSearchTextChanged Callback function for handling search text changes.
+ * @param onAddressSelected Callback function for handling address selection.
+ * @param modifier The modifier for the composable.
+ * @param context The Android Context.
+ * @param locationViewModel The view model for handling location-related data and operations.
+ */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun LocationAutocomplete(

@@ -37,10 +37,16 @@ private val LightColorScheme = lightColorScheme(
     */
 )
 
+/**
+ * Composable function that applies the UAVScout project theme to the content.
+ *
+ * @param darkTheme Whether to use the dark theme. Defaults to the system's dark mode setting.
+ * @param dynamicColor Whether to use dynamic colors. Available on Android 12+. Defaults to true.
+ * @param content The composable content to apply the theme to.
+ */
 @Composable
 fun UAVScoutProjectTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {

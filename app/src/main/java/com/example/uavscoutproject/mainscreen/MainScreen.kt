@@ -51,28 +51,50 @@ import com.example.uavscoutproject.mainscreen.location.viewmodel.LocationViewMod
 import com.example.uavscoutproject.navigation.AppScreens
 import com.example.uavscoutproject.navigation.DrawerBody
 import com.example.uavscoutproject.navigation.DrawerHeader
-import com.example.uavscoutproject.navigation.Menuitem
+import com.example.uavscoutproject.navigation.MenuItem
 
 const val INDICATOR_WIDTH = 8
 
 
+/**
+ * Composable function for the main screen.
+ *
+ * @param navController The navigation controller for navigating between screens.
+ * @param droneViewModel The view model for drone-related data.
+ * @param locationViewModel The view model for location-related data.
+ */
 @Composable
 fun MainScreen(
     navController: NavHostController,
     droneViewModel: DroneViewModel = viewModel(),
     locationViewModel: LocationViewModel = viewModel()
 ) {
+    /**
+     * List of titles for the tabs in the screen.
+     */
     val tabTitles = listOf("Inicio", "Mapa", "Datos"/*, "Usuarios"*/)
+
+    /**
+     * State variables for managing the drawer and scaffold.
+     */
     val scaffoldState = rememberScaffoldState()
     val scope = rememberCoroutineScope()
     val isDrawerOpen = remember { mutableStateOf(false) }
     val drawerState = scaffoldState.drawerState
+
+    /**
+     * Update isDrawerOpen value when the drawer state changes.
+     */
     LaunchedEffect(drawerState.isOpen) {
         isDrawerOpen.value = drawerState.isOpen
     }
+
     Scaffold(
         scaffoldState = scaffoldState,
         topBar = {
+            /**
+             * Custom top app bar with navigation icon.
+             */
             NavAppbar(
                 onNavigationIconClick = {
                     scope.launch {
@@ -83,28 +105,32 @@ fun MainScreen(
             )
         },
         drawerContent = {
+            /**
+             * Drawer content with header and body items.
+             */
             DrawerHeader()
             DrawerBody(
                 items = listOf(
-                    Menuitem(
+                    // Menu items for navigation
+                    MenuItem(
                         id = AppScreens.ProfileScreen.route,
                         title = "Perfil de piloto",
                         description = "Go to pilot profile screen",
                         icon = painterResource(id = R.drawable.ic_profile)
                     ),
-                    Menuitem(
+                    MenuItem(
                         id = AppScreens.RuleSetInfoScreen.route,
                         title = "Reglamento",
                         description = "Go to ruleset screen",
                         icon = painterResource(id = R.drawable.ic_rules)
                     ),
-                    Menuitem(
+                    MenuItem(
                         id = AppScreens.SettingsScreen.route,
                         title = "Ajustes",
                         description = "Go to settings screen",
                         icon = painterResource(id = R.drawable.ic_settings)
                     ),
-                    Menuitem(
+                    MenuItem(
                         id = AppScreens.SupportScreen.route,
                         title = "Ayuda y soporte",
                         description = "Go to support screen",
@@ -123,18 +149,27 @@ fun MainScreen(
         drawerGesturesEnabled = isDrawerOpen.value,
         backgroundColor = MaterialTheme.colorScheme.background
     ){paddingValues ->
+        /**
+         * Composable function for the content of the scaffold.
+         */
         ScaffoldContent(
             padding = paddingValues,
             tabTitles = tabTitles,
             navController = navController,
             locationViewModel,
-            droneViewModel)
+            droneViewModel
+        )
     }
 
 }
 
-
-
+/**
+ * Modifier extension function to customize the tab indicator offset.
+ *
+ * @param currentTabPosition The current tab position.
+ * @param tabWidth The width of the tab.
+ * @return Modifier with custom tab indicator offset.
+ */
 fun Modifier.customTabIndicatorOffset(
     currentTabPosition: TabPosition,
     tabWidth: Dp
@@ -158,6 +193,9 @@ fun Modifier.customTabIndicatorOffset(
         .width(currentTabWidth)
 }
 
+/**
+ * Preview function for the MainScreen composable.
+ */
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun MainScreenPreview(){
@@ -165,6 +203,15 @@ fun MainScreenPreview(){
     MainScreen(navController)
 }
 
+/**
+ * Composable function for the content of the scaffold.
+ *
+ * @param padding The padding values for the content.
+ * @param tabTitles The titles of the tabs.
+ * @param navController The navigation controller.
+ * @param locationViewModel The view model for location-related data.
+ * @param droneViewModel The view model for drone-related data.
+ */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ScaffoldContent(
@@ -174,16 +221,36 @@ fun ScaffoldContent(
     locationViewModel: LocationViewModel,
     droneViewModel: DroneViewModel
 ) {
+    /**
+     * Calculate the width of each tab indicator.
+     */
     val tabWidth = tabTitles.map { it.length.dp * INDICATOR_WIDTH }
+
+    /**
+     * List of icons for the tabs.
+     */
     val tabIcons = listOf(
         R.drawable.ic_home,
         R.drawable.ic_location,
         R.drawable.ic_data,
         //R.drawable.ic_social
     )
+
+    /**
+     * Pager state for managing tab content.
+     */
     val pagerState = rememberPagerState()
+
+    /**
+     * Coroutine scope for launching animations.
+     */
     val coroutineScope = rememberCoroutineScope()
+
+    /**
+     * Current selected tab index.
+     */
     val selectedTabIndex = pagerState.currentPage
+
     Column(
         modifier = Modifier.padding(bottom = padding.calculateBottomPadding()),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -194,11 +261,16 @@ fun ScaffoldContent(
                 state = pagerState,
                 userScrollEnabled = false
             ) { page ->
+                /**
+                 * Content of each tab page.
+                 */
                 when (page) {
-                    0 -> HomeView(navController,locationViewModel, droneViewModel)
+                    0 -> HomeView(navController, locationViewModel, droneViewModel)
                     1 -> LocationView(locationViewModel = locationViewModel)
-                    2 -> DataView(locationViewModel = locationViewModel,
-                                  droneViewModel = droneViewModel)
+                    2 -> DataView(
+                        locationViewModel = locationViewModel,
+                        droneViewModel = droneViewModel
+                    )
                     //3 -> UsersView(navController)
                 }
             }
@@ -222,6 +294,9 @@ fun ScaffoldContent(
             },
             divider = { Divider(thickness = 0.dp, color = Color.Transparent) }
         ) {
+            /**
+             * Create a Tab composable for each tab title.
+             */
             tabTitles.forEachIndexed { index, title ->
                 Tab(
                     selected = pagerState.currentPage == index,

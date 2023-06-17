@@ -18,11 +18,17 @@ import androidx.navigation.compose.rememberNavController
 import com.example.uavscoutproject.NavAppbar
 import com.example.uavscoutproject.R
 import com.example.uavscoutproject.navigation.AppScreens
-import com.example.uavscoutproject.navigation.bottomBar
+import com.example.uavscoutproject.navigation.BottomBar
 
+/**
+ * Composable function that represents the Support screen(TBD).
+ *
+ * @param navController The [NavHostController] used for navigation.
+ */
 @Composable
-fun SupportScreen(navController: NavHostController){
+fun SupportScreen(navController: NavHostController) {
     val scaffoldState = rememberScaffoldState()
+
     Scaffold(
         scaffoldState = scaffoldState,
         topBar = {
@@ -34,28 +40,36 @@ fun SupportScreen(navController: NavHostController){
                 buttonColor = R.color.back_button_color
             )
         },
-        bottomBar = { bottomBar() },
+        bottomBar = { BottomBar() },
         backgroundColor = MaterialTheme.colorScheme.background
-    ){ paddingValues ->
+    ) { paddingValues ->
         Support(padding = paddingValues)
     }
 }
 
+/**
+ * Composable function that represents the content of the Support screen(TBD).
+ *
+ * @param padding The padding values to apply to the content.
+ */
 @Composable
 fun Support(padding: PaddingValues) {
-        Column(modifier = Modifier.fillMaxSize()
+    Column(
+        modifier = Modifier.fillMaxSize()
             .padding(bottom = padding.calculateBottomPadding()),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center) {
-
-                Text("Support Screen: TBD")
-        }
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text("Support Screen: TBD")
+    }
 }
 
-
+/**
+ * Preview function for the Support screen(TBD).
+ */
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun SupportScreenPreview(){
+fun SupportScreenPreview() {
     val navController = rememberNavController()
     SupportScreen(navController)
 }

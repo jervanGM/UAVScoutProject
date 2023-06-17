@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.example.uavscoutproject.materials
 
 import androidx.compose.runtime.Composable
@@ -10,18 +12,22 @@ import androidx.lifecycle.LifecycleEventObserver
 import com.example.uavscoutproject.R
 import com.mapbox.android.gestures.BuildConfig
 import org.osmdroid.config.Configuration
-import org.osmdroid.tileprovider.modules.OfflineTileProvider
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import java.io.File
 
+/**
+ * Creates a [MapView] composable that follows the lifecycle of the current composable.
+ *
+ * @return The created [MapView].
+ */
 @Composable
 fun rememberMapViewWithLifecycle(): MapView {
     val context = LocalContext.current
-    Configuration.getInstance().setUserAgentValue(BuildConfig.APPLICATION_ID)
+    Configuration.getInstance().userAgentValue = BuildConfig.APPLICATION_ID
     Configuration.getInstance().osmdroidBasePath = File(context.filesDir, "osmdroid/base")
-    Configuration.getInstance().osmdroidTileCache = File(context.filesDir ,"/osmdroid/cache")
+    Configuration.getInstance().osmdroidTileCache = File(context.filesDir, "/osmdroid/cache")
     val mapView = remember {
         MapView(context).apply {
             id = R.id.map
@@ -31,7 +37,6 @@ fun rememberMapViewWithLifecycle(): MapView {
             setMultiTouchControls(true)
             val startPoint = GeoPoint(40.416775, -3.703790)
             setExpectedCenter(startPoint)
-
         }
     }
 
@@ -48,6 +53,12 @@ fun rememberMapViewWithLifecycle(): MapView {
     return mapView
 }
 
+/**
+ * Creates a [LifecycleEventObserver] that maps the lifecycle events to corresponding MapView actions.
+ *
+ * @param mapView The MapView to observe.
+ * @return The created [LifecycleEventObserver].
+ */
 @Composable
 fun rememberMapLifecycleObserver(mapView: MapView): LifecycleEventObserver =
     remember(mapView) {
@@ -59,6 +70,7 @@ fun rememberMapLifecycleObserver(mapView: MapView): LifecycleEventObserver =
             }
         }
     }
+
 
 
 

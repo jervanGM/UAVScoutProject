@@ -56,237 +56,247 @@ import com.example.uavscoutproject.preferences.MyPreferences
 import kotlinx.coroutines.delay
 
 
+/**
+ * Composable function that displays the data view.
+ *
+ * @param dataViewModel The data view model to use for retrieving data.
+ * @param locationViewModel The location view model to use for retrieving location data.
+ * @param droneViewModel The drone view model to use for retrieving drone data.
+ */
 @Composable
-fun DataView(dataViewModel: DataViewModel = viewModel(),
-             locationViewModel : LocationViewModel = viewModel(),
-             droneViewModel: DroneViewModel = viewModel()) {
+fun DataView(
+    dataViewModel: DataViewModel = viewModel(),
+    locationViewModel: LocationViewModel = viewModel(),
+    droneViewModel: DroneViewModel = viewModel()
+) {
     var show by remember { mutableStateOf(false) }
     var showindex by remember { mutableStateOf(0) }
     var selectedOption by remember { mutableStateOf("Hoy") }
     var expanded by remember { mutableStateOf(false) }
     val items = droneViewModel.getList()
-    val droneAttribute = listOf("Distancia", "Consumo",
-        "Velocidad","Duración",
-        "Altitud")
+    val droneAttribute = listOf("Distancia", "Consumo", "Velocidad", "Duración", "Altitud")
     var droneData = RouteStatistics(
         0.0, 0,
         0, 0,
         0.0, 0.0,
-        Triple(android.graphics.Color.parseColor("#66FBB0"),
-            R.drawable.ic_void,"No hay condiciones para volar")
+        Triple(android.graphics.Color.parseColor("#66FBB0"), R.drawable.ic_void, "No hay condiciones para volar")
     )
     val tablefontSize = 14.sp
     val fistLocation = dataViewModel.firstlocation.title
     val lastLocation = dataViewModel.lastlocation.title
     val hourlyData = dataViewModel.getWeatherValue()
     val context = LocalContext.current
-    // Resto del código de tu vista DataView
+
+    // Start listening to data updates
     LaunchedEffect(Unit) {
         dataViewModel.startListening()
+
+        // Continuously save sensor data at intervals
         while (true) {
             dataViewModel.saveSensorData(!MyPreferences(context).getBooleanSetting("isLocal"))
-            delay(60000) // Retraso de 60 segundos
+            delay(60000) // Delay of 60 seconds
         }
     }
+
+    // Fetch hourly weather data and save it
     dataViewModel.fetchHourlyWeatherData(locationViewModel.locationDataList)
     dataViewModel.saveWeatherData(!MyPreferences(context).getBooleanSetting("isLocal"))
-    LazyColumn(horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxWidth()) {
-        item{
-            Text(text = "Condiciones climáticas de ruta",
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(top = 16.dp),
-            fontSize = 14.sp
-        )
-        Image(
-            painter = painterResource(id = dataViewModel.getIlluminationIcon()),
-            contentDescription =
-            "Illumintaion at $${dataViewModel.getIlluminationValue().observeAsState().value} percent",
-            modifier = Modifier
-                .size(70.dp)
-        )
-        val dateinfo = dataViewModel.getCurrentDate()
-        Text(text = "${dateinfo["dayOfWeek"]},${dateinfo["dayOfMonth"]}",
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(vertical = 2.dp),
-            fontSize = 18.sp
-        )
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp),
-        horizontalArrangement = Arrangement.SpaceEvenly) {
 
-               SensorBox(
-                   color = dataViewModel.getHumidityColor(),
-                   title = "Humedad",
-                   value = "${dataViewModel.getHumidityValue().observeAsState().value}%"
-               )
-
-               SensorBox(
-                   color = dataViewModel.getTemperatureColor(),
-                   title = "Temperatura",
-                   value = "${dataViewModel.getTemperatureValue().observeAsState().value}°",
-                   horizontalpadding = 18
-               )
-               SensorBox(
-                   color = dataViewModel.getPressureColor(),
-                   title = "Presión(bar)",
-                   value = "${dataViewModel.getPressureValue().observeAsState().value}",
-                   horizontalpadding = 18
-               )
-        }
-        TabRow(
-            options = listOf("Hoy", "Mañana", "Día"),
-            selectedOption = selectedOption,
-            onOptionSelected = { option ->
-                selectedOption = option
-            }
-        )
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                painter = painterResource(R.drawable.ic_arrow_left),
-                modifier = Modifier
-                    .size(14.dp),
-                contentDescription = null
+    LazyColumn(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        item {
+            Text(
+                text = "Condiciones climáticas de ruta",
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(top = 16.dp),
+                fontSize = 14.sp
             )
-            Box(
-                modifier = Modifier
-                    .width(360.dp)
-                    .padding(vertical = 12.dp),
+            Image(
+                painter = painterResource(id = dataViewModel.getIlluminationIcon()),
+                contentDescription = "Illumintaion at $${dataViewModel.getIlluminationValue().observeAsState().value} percent",
+                modifier = Modifier.size(70.dp)
+            )
+            val dateinfo = dataViewModel.getCurrentDate()
+            Text(
+                text = "${dateinfo["dayOfWeek"]},${dateinfo["dayOfMonth"]}",
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(vertical = 2.dp),
+                fontSize = 18.sp
+            )
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                LazyRow(
+                SensorBox(
+                    color = dataViewModel.getHumidityColor(),
+                    title = "Humedad",
+                    value = "${dataViewModel.getHumidityValue().observeAsState().value}%"
+                )
+                SensorBox(
+                    color = dataViewModel.getTemperatureColor(),
+                    title = "Temperatura",
+                    value = "${dataViewModel.getTemperatureValue().observeAsState().value}°",
+                    horizontalpadding = 18
+                )
+                SensorBox(
+                    color = dataViewModel.getPressureColor(),
+                    title = "Presión(bar)",
+                    value = "${dataViewModel.getPressureValue().observeAsState().value}",
+                    horizontalpadding = 18
+                )
+            }
+            TabRow(
+                options = listOf("Hoy", "Mañana", "Día"),
+                selectedOption = selectedOption,
+                onOptionSelected = { option ->
+                    selectedOption = option
+                }
+            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_arrow_left),
+                    modifier = Modifier.size(14.dp),
+                    contentDescription = null
+                )
+                Box(
+                    modifier = Modifier.width(360.dp).padding(vertical = 12.dp),
                 ) {
-
-                    itemsIndexed(hourlyData.time) { index, _ ->
-                        val indexes = hourlyData.getDayWeatherData(selectedOption)
-                        if (index in indexes.first..indexes.second) {
-                            if (show) {
-                                WeatherDialog(
-                                    firstlocation = fistLocation,
-                                    lastlocation = lastLocation,
+                    LazyRow() {
+                        itemsIndexed(hourlyData.time) { index, _ ->
+                            val indexes = hourlyData.getDayWeatherData(selectedOption)
+                            if (index in indexes.first..indexes.second) {
+                                if (show) {
+                                    WeatherDialog(
+                                        firstlocation = fistLocation,
+                                        lastlocation = lastLocation,
+                                        data = hourlyData,
+                                        index = showindex,
+                                        onDismiss = { show = false })
+                                }
+                                WeatherBox(
                                     data = hourlyData,
-                                    index = showindex,
-                                    onDismiss = { show = false })
+                                    horizontalpadding = 18,
+                                    icon = hourlyData.getWeatherIcon(index),
+                                    index = index
+                                ) { indexed ->
+                                    show = true
+                                    showindex = indexed
+                                }
+                                Spacer(modifier = Modifier.width(8.dp))
                             }
-                            WeatherBox(
-                                data = hourlyData,
-                                horizontalpadding = 18,
-                                icon = hourlyData.getWeatherIcon(index),
-                                index = index
-                            ) { indexed ->
-                                show = true
-                                showindex = indexed
-                            }
-                            Spacer(modifier = Modifier.width(8.dp))
                         }
                     }
                 }
-            }
-            Icon(
-                painter = painterResource(R.drawable.ic_arrow_right),
-                modifier = Modifier
-                    .size(14.dp),
-                contentDescription = null
-            )
-        }
-        Text(text = "Información estimada de vuelo",
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(bottom = 8.dp),
-            fontSize = 14.sp
-        )
-        DropDownMenuData(
-            expanded,
-            onExpandedChange = { expanded = it },
-            ondroneSelected = {drone ->
-                                droneData = dataViewModel.calculateRouteStatistics(
-                                    droneData = drone,
-                                    weatherData = hourlyData,
-                                    route = locationViewModel.locationDataList
-                                )
-                                droneViewModel.saveRouteData(
-                                    !MyPreferences(context).getBooleanSetting("isLocal")
-                                )
-                              },
-            items)
-        Column(
-            Modifier.padding(horizontal = 16.dp)
-        ) {
-            Row(
-                Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp)
-            ) {
-                TableCell(text = droneAttribute[0],tablefontSize,true, weight = 2f)
-                TableCell(text = "${droneData.totalDistance} Km",tablefontSize, weight = 2f)
-                TableCell(text = droneAttribute[1],tablefontSize,true, weight = 2f)
-                TableCell(text = "${droneData.totalConsumption} W",tablefontSize, weight = 2f)
-            }
-
-            Row(
-                Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp)
-            ) {
-                TableCell(text = droneAttribute[2],tablefontSize, true,weight = 2f)
-                TableCell(text = "${droneData.averageSpeed} Km/h",tablefontSize, weight = 2f)
-                TableCell(text = droneAttribute[3],tablefontSize,true, weight = 2f)
-                TableCell(text = "${droneData.flightDuration} min",tablefontSize, weight = 2f)
-            }
-
-            Row(
-                Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp)
-            ) {
-                TableCell(text = droneAttribute[4],tablefontSize,true, weight = 1.6f)
-                TableCell(text = "${droneData.minAltitude} Km - ${droneData.maxAltitude} Km",tablefontSize, weight = 5f)
-            }
-        }
-        Box(modifier = Modifier.padding(horizontal = 24.dp)) {
-            val redColor = Color(droneData.routeEvaluation.first)
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .height(32.dp)
-                    .fillMaxWidth()
-                    .border(2.dp, redColor, shape = RoundedCornerShape(4.dp))
-            ) {
                 Icon(
-                    painter = painterResource(id = droneData.routeEvaluation.second),
-                    contentDescription = "Añadir item",
-                    tint = redColor,
-                    modifier = Modifier.size(14.dp)
-                )
-                Text(
-                    droneData.routeEvaluation.third,
-                    fontSize = 10.sp,
-                    color = redColor,
-                    modifier = Modifier.padding(8.dp)
+                    painter = painterResource(R.drawable.ic_arrow_right),
+                    modifier = Modifier.size(14.dp),
+                    contentDescription = null
                 )
             }
+            Text(
+                text = "Información estimada de vuelo",
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(bottom = 8.dp),
+                fontSize = 14.sp
+            )
+            DropDownMenuData(
+                expanded,
+                onExpandedChange = { expanded = it },
+                ondroneSelected = { drone ->
+                    droneData = dataViewModel.calculateRouteStatistics(
+                        droneData = drone,
+                        weatherData = hourlyData,
+                        route = locationViewModel.locationDataList
+                    )
+                    droneViewModel.saveRouteData(!MyPreferences(context).getBooleanSetting("isLocal"))
+                },
+                items
+            )
+            Column(Modifier.padding(horizontal = 16.dp)) {
+                Row(Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+                    TableCell(text = droneAttribute[0], tablefontSize, true, weight = 2f)
+                    TableCell(text = "${droneData.totalDistance} Km", tablefontSize, weight = 2f)
+                    TableCell(text = droneAttribute[1], tablefontSize, true, weight = 2f)
+                    TableCell(text = "${droneData.totalConsumption} W", tablefontSize, weight = 2f)
+                }
+                Row(Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+                    TableCell(text = droneAttribute[2], tablefontSize, true, weight = 2f)
+                    TableCell(text = "${droneData.averageSpeed} Km/h", tablefontSize, weight = 2f)
+                    TableCell(text = droneAttribute[3], tablefontSize, true, weight = 2f)
+                    TableCell(text = "${droneData.flightDuration} min", tablefontSize, weight = 2f)
+                }
+                Row(Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+                    TableCell(text = droneAttribute[4], tablefontSize, true, weight = 1.6f)
+                    TableCell(
+                        text = "${droneData.minAltitude} Km - ${droneData.maxAltitude} Km",
+                        tablefontSize,
+                        weight = 5f
+                    )
+                }
+            }
+            Box(modifier = Modifier.padding(horizontal = 24.dp)) {
+                val redColor = Color(droneData.routeEvaluation.first)
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .height(32.dp)
+                        .fillMaxWidth()
+                        .border(2.dp, redColor, shape = RoundedCornerShape(4.dp))
+                ) {
+                    Icon(
+                        painter = painterResource(id = droneData.routeEvaluation.second),
+                        contentDescription = "Añadir item",
+                        tint = redColor,
+                        modifier = Modifier.size(14.dp)
+                    )
+                    Text(
+                        droneData.routeEvaluation.third,
+                        fontSize = 10.sp,
+                        color = redColor,
+                        modifier = Modifier.padding(8.dp)
+                    )
+                }
+            }
         }
-    }}
+    }
 }
 
+
+/**
+ * Function used for previewing the [DataView] composable.
+ */
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun DataPreview(){
+fun DataPreview() {
     DataView()
 }
 
 
+
+/**
+ * Composable function that represents a sensor box.
+ *
+ * @param color The color of the sensor box.
+ * @param title The title of the sensor box.
+ * @param value The value of the sensor box.
+ * @param horizontalpadding The horizontal padding value.
+ */
 @Composable
-fun SensorBox(color: String, title: String, value: String, horizontalpadding:Int = 24) {
+fun SensorBox(color: String, title: String, value: String, horizontalpadding: Int = 24) {
     val animcolor = animateColorAsState(Color(android.graphics.Color.parseColor(color)))
+
     Box(
         modifier = Modifier
             .background(animcolor.value, shape = RoundedCornerShape(24.dp))
             .padding(vertical = 12.dp, horizontal = horizontalpadding.dp)
-    ){
+    ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
                 text = title,
@@ -304,17 +314,25 @@ fun SensorBox(color: String, title: String, value: String, horizontalpadding:Int
     }
 }
 
-
+/**
+ * Composable function that represents a weather box.
+ *
+ * @param data The hourly weather data.
+ * @param horizontalpadding The horizontal padding value.
+ * @param index The index of the weather data.
+ * @param icon The icon resource ID for the weather.
+ * @param onClick The click listener for the weather box.
+ */
 @Composable
 fun WeatherBox(
-    data : HourlyData,
+    data: HourlyData,
     horizontalpadding: Int = 24,
     index: Int,
     icon: Int,
     onClick: (Int) -> Unit,
-
 ) {
     val evaluation = data.evaluateFlightPossibility(index)
+
     Box(
         modifier = Modifier
             .background(Color(evaluation.first), shape = RoundedCornerShape(24.dp))
@@ -325,7 +343,7 @@ fun WeatherBox(
             )
             .padding(vertical = 16.dp, horizontal = horizontalpadding.dp)
             .clickable { onClick(index) }
-    ){
+    ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Icon(
                 painter = painterResource(icon),
@@ -336,12 +354,10 @@ fun WeatherBox(
             Text(
                 text = "${data.temperature_2m[index].toInt()}°",
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(start = 20.dp, top =16.dp,
-                                            bottom =16.dp, end =16.dp),
+                modifier = Modifier.padding(start = 20.dp, top = 16.dp, bottom = 16.dp, end = 16.dp),
                 fontSize = 28.sp
             )
-            Row(verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(start = 18.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(start = 18.dp)) {
                 Text(
                     text = data.time[index],
                     textAlign = TextAlign.Center,
@@ -355,12 +371,20 @@ fun WeatherBox(
                     contentDescription = null
                 )
             }
-
         }
     }
 }
 
 
+
+/**
+ * Composable function that represents a drop-down menu for selecting drone data.
+ *
+ * @param expanded Whether the drop-down menu is expanded or not.
+ * @param onExpandedChange Callback function to notify changes in the expanded state.
+ * @param ondroneSelected Callback function to handle the selection of a drone item.
+ * @param items The list of drone data items to display in the drop-down menu.
+ */
 @Composable
 fun DropDownMenuData(
     expanded: Boolean,
@@ -370,6 +394,7 @@ fun DropDownMenuData(
 ) {
     var selectedItem by remember { mutableStateOf<String?>(null) }
     var selectedIconItem by remember { mutableStateOf(R.drawable.ic_arrow_down) }
+
     Column(Modifier.padding(horizontal = 22.dp)) {
         Row(
             Modifier
@@ -384,7 +409,6 @@ fun DropDownMenuData(
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
-
             Box(
                 Modifier
                     .weight(0.9f)
@@ -414,6 +438,7 @@ fun DropDownMenuData(
                     .align(Alignment.CenterVertically)
             )
         }
+
         DropdownMenu(
             expanded = expanded,
             onDismissRequest = { onExpandedChange(false) },
@@ -433,10 +458,8 @@ fun DropDownMenuData(
                                 text = item.name,
                                 fontSize = 19.sp,
                                 textAlign = TextAlign.Center,
-
-                                )
+                            )
                         }
-
                     },
                     onClick = {
                         ondroneSelected(item)
@@ -447,11 +470,18 @@ fun DropDownMenuData(
                 )
             }
         }
-
     }
 }
 
 
+
+/**
+ * Composable function that represents a row of tabs to select the day of the weather list.
+ *
+ * @param options The list of tab options.
+ * @param selectedOption The currently selected tab option.
+ * @param onOptionSelected Callback function to handle the selection of a tab option.
+ */
 @Composable
 fun TabRow(
     options: List<String>,
@@ -475,11 +505,12 @@ fun TabRow(
             val backgroundColor = if (isSelected) Color(android.graphics.Color.parseColor("#12CDD4"))
             else Color.Transparent
             val borderColor = if (isSelected) Color.Black else Color.Transparent
+
             Box(
                 modifier = Modifier
                     .weight(1f)
                     .height(45.dp)
-                    .padding(1.dp) // added padding to cover the border of the Row
+                    .padding(1.dp) // Added padding to cover the border of the Row
                     .background(
                         backgroundColor,
                         shape = RoundedCornerShape(4.dp)
@@ -501,6 +532,7 @@ fun TabRow(
         }
     }
 }
+
 
 
 

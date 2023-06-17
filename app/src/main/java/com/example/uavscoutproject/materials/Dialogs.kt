@@ -51,6 +51,12 @@ import com.example.uavscoutproject.mainscreen.home.loadBitmapFromUri
 import com.example.uavscoutproject.mainscreen.location.data.AirSpace
 import com.example.uavscoutproject.mainscreen.location.viewmodel.LocationViewModel
 
+/**
+ * Displays a dialog with drone data.
+ *
+ * @param dronedata The data of the drone.
+ * @param onDismiss Callback function when the dialog is dismissed.
+ */
 @Composable
 fun DroneDialog(dronedata: Dronedata, onDismiss: () -> Unit){
     val droneAttribute = listOf("Color", "Batería",
@@ -65,6 +71,8 @@ fun DroneDialog(dronedata: Dronedata, onDismiss: () -> Unit){
         dronedata.capacity.filter { it.isDigit() }.toIntOrNull()
     )
     val tablefontSize = 14.sp
+
+    //Displays the drone dialog.
     Dialog(properties = DialogProperties(usePlatformDefaultWidth = false),
         onDismissRequest = onDismiss) {
         Surface(
@@ -101,7 +109,7 @@ fun DroneDialog(dronedata: Dronedata, onDismiss: () -> Unit){
                             }
                         when (imagePainter) {
                             is AsyncImagePainter -> {
-                                // La variable `imagePainter` es un ImagePainter
+                                // The `imagePainter` variable is an ImagePainter
                                 Image(
                                     painter = imagePainter,
                                     contentDescription = "Default image",
@@ -124,7 +132,7 @@ fun DroneDialog(dronedata: Dronedata, onDismiss: () -> Unit){
                             }
 
                             is ImageBitmap -> {
-                                // La variable `imagePainter` es un Bitmap
+                                // The `imagePainter` variable is a Bitmap
                                 Image(
                                     bitmap = imagePainter.asAndroidBitmap().asImageBitmap(),
                                     contentDescription = "Default image",
@@ -148,7 +156,7 @@ fun DroneDialog(dronedata: Dronedata, onDismiss: () -> Unit){
                         }
                     }
                     else{
-                        // La variable `imagePainter` no es ni un ImagePainter ni un Bitmap
+                        // The `imagePainter` variable is neither an ImagePainter nor a Bitmap
                         Image(
                             painter = painterResource(R.drawable.no_image),
                             contentDescription = "Default image",
@@ -187,8 +195,6 @@ fun DroneDialog(dronedata: Dronedata, onDismiss: () -> Unit){
                         Text(text = "N/S: ${dronedata.serial}", fontSize = 12.sp,
                             color = Color(android.graphics.Color.parseColor("#808080")),
                             modifier = Modifier.padding(start = 8.dp))
-
-
                     }
                 }
                 Column(
@@ -204,7 +210,6 @@ fun DroneDialog(dronedata: Dronedata, onDismiss: () -> Unit){
                         TableCell(text = droneAttribute[1],tablefontSize,true, weight = 2f)
                         TableCell(text = droneData[1] as String,tablefontSize, weight = 2f)
                     }
-
                     Row(
                         Modifier
                             .fillMaxWidth()
@@ -215,7 +220,6 @@ fun DroneDialog(dronedata: Dronedata, onDismiss: () -> Unit){
                         TableCell(text = droneAttribute[3],tablefontSize,true, weight = 2f)
                         TableCell(text = "${droneData[3]} Wh",tablefontSize, weight = 2f)
                     }
-
                     Row(
                         Modifier
                             .fillMaxWidth()
@@ -239,9 +243,17 @@ fun DroneDialog(dronedata: Dronedata, onDismiss: () -> Unit){
             }
         }
     }
-
 }
 
+/**
+ * Displays a weather dialog with the given parameters.
+ *
+ * @param lastlocation The last location value.
+ * @param firstlocation The first location value.
+ * @param index The index value.
+ * @param data The hourly data.
+ * @param onDismiss Callback when the dialog is dismissed.
+ */
 @Composable
 fun WeatherDialog(
     lastlocation: String,
@@ -250,14 +262,20 @@ fun WeatherDialog(
     data: HourlyData,
     onDismiss: () -> Unit,
 ){
-    val weatherAttribute = listOf("Humedad", "Lluvia",
-        "Presión","Visibilidad",
-        "Viento", "Dirección")
+    // Define weather attributes
+    val weatherAttribute = listOf("Humedad", "Lluvia", "Presión", "Visibilidad", "Viento", "Dirección")
+
+    // Define table font size
     val tablefontSize = 14.sp
+
+    // Define semi-transparent gray color
     val grayColorSemiTransparent = Color.LightGray.copy(0.6f)
+
+    // Evaluate flight possibility based on data and index
     val evaluation = data.evaluateFlightPossibility(index)
-    Dialog(properties = DialogProperties(usePlatformDefaultWidth = false),
-        onDismissRequest = onDismiss) {
+
+    // Display the weather dialog
+    Dialog(properties = DialogProperties(usePlatformDefaultWidth = false), onDismissRequest = onDismiss) {
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
@@ -266,48 +284,58 @@ fun WeatherDialog(
             shape = RoundedCornerShape(70.dp),
             color = Color(evaluation.first)
         ) {
-            Column(modifier = Modifier.padding(16.dp),
-                   horizontalAlignment = Alignment.CenterHorizontally) {
-
-                Row(verticalAlignment = Alignment.CenterVertically,
+            Column(
+                modifier = Modifier.padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // Display weather icon, time, and temperature
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     modifier = Modifier
                         .fillMaxWidth(0.7f)
-                        .padding(top = 16.dp)){
+                        .padding(top = 16.dp)
+                ) {
                     Icon(
                         painter = painterResource(data.getWeatherIcon(index)),
-                        modifier = Modifier
-                            .size(60.dp),
+                        modifier = Modifier.size(60.dp),
                         contentDescription = null
                     )
-                    Text(text = data.time[index],
-                         fontWeight = FontWeight.Bold,
-                         fontSize = 36.sp)
-                    Text(text = "${data.temperature_2m[index].toInt()}°",
-                         fontWeight = FontWeight.Bold,
-                         fontSize = 36.sp)
+                    Text(
+                        text = data.time[index],
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 36.sp
+                    )
+                    Text(
+                        text = "${data.temperature_2m[index].toInt()}°",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 36.sp
+                    )
                 }
-                Row(verticalAlignment = Alignment.CenterVertically,
+
+                // Display location information
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center,
-                    modifier = Modifier.padding(vertical = 16.dp)) {
+                    modifier = Modifier.padding(vertical = 16.dp)
+                ) {
                     Icon(
                         painter = painterResource(R.drawable.ic_route),
-                        modifier = Modifier
-                            .size(36.dp),
+                        modifier = Modifier.size(36.dp),
                         contentDescription = null
                     )
-                    Text(text = "$firstlocation \n" +
-                                    "--- \n" +
-                                    lastlocation,
+                    Text(
+                        text = "$firstlocation \n--- \n$lastlocation",
                         fontWeight = FontWeight.Bold,
-                        modifier = Modifier
-                            .padding(start = 8.dp),
+                        modifier = Modifier.padding(start = 8.dp),
                         fontSize = 18.sp,
                         textAlign = TextAlign.Center,
                         softWrap = true,
                         overflow = TextOverflow.Ellipsis
                     )
                 }
+
+                // Display weather attributes in a table format
                 Column(
                     Modifier
                         .fillMaxWidth(0.92f)
@@ -317,55 +345,108 @@ fun WeatherDialog(
                         )
                 ) {
                     Row(
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp)
+                        Modifier.fillMaxWidth().padding(vertical = 8.dp)
                     ) {
-                        TableCell(text = weatherAttribute[0],tablefontSize,true, weight = 2f)
-                        TableCell(text = "${data.relativehumidity_2m[index]}%",tablefontSize, weight = 2f)
-                        TableCell(text = weatherAttribute[1],tablefontSize,true, weight = 2f)
-                        TableCell(text = "${data.precipitation_probability[index]}%",tablefontSize, weight = 2f)
+                        TableCell(
+                            text = weatherAttribute[0],
+                            fontSize = tablefontSize,
+                            bold = true,
+                            weight = 2f
+                        )
+                        TableCell(
+                            text = "${data.relativehumidity_2m[index]}%",
+                            fontSize = tablefontSize,
+                            weight = 2f
+                        )
+                        TableCell(
+                            text = weatherAttribute[1],
+                            fontSize = tablefontSize,
+                            bold = true,
+                            weight = 2f
+                        )
+                        TableCell(
+                            text = "${data.precipitation_probability[index]}%",
+                            fontSize = tablefontSize,
+                            weight = 2f
+                        )
                     }
 
                     Row(
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp)
+                        Modifier.fillMaxWidth().padding(vertical = 8.dp)
                     ) {
-                        TableCell(text = weatherAttribute[2],tablefontSize, true,weight = 2f)
-                        TableCell(text = "${data.surface_pressure[index]} bar",tablefontSize, weight = 2f)
-                        TableCell(text = weatherAttribute[3],tablefontSize,true, weight = 2f)
-                        TableCell(text = "${data.visibility[index]} Km",tablefontSize, weight = 2f)
+                        TableCell(
+                            text = weatherAttribute[2],
+                            fontSize = tablefontSize,
+                            bold = true,
+                            weight = 2f
+                        )
+                        TableCell(
+                            text = "${data.surface_pressure[index]} bar",
+                            fontSize = tablefontSize,
+                            weight = 2f
+                        )
+                        TableCell(
+                            text = weatherAttribute[3],
+                            fontSize = tablefontSize,
+                            bold = true,
+                            weight = 2f
+                        )
+                        TableCell(
+                            text = "${data.visibility[index]} Km",
+                            fontSize = tablefontSize,
+                            weight = 2f
+                        )
                     }
 
                     Row(
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp)
+                        Modifier.fillMaxWidth().padding(vertical = 8.dp)
                     ) {
-                        TableCell(text = weatherAttribute[4],tablefontSize,true, weight = 2f)
-                        TableCell(text = "${data.windspeed_10m[index]} Km/h",tablefontSize, weight = 2f)
-                        TableCell(text = weatherAttribute[5],tablefontSize,true, weight = 2f)
-                        TableCell(text = data.getWindDirection(index),tablefontSize, weight = 2f)
+                        TableCell(
+                            text = weatherAttribute[4],
+                            fontSize = tablefontSize,
+                            bold = true,
+                            weight = 2f
+                        )
+                        TableCell(
+                            text = "${data.windspeed_10m[index]} Km/h",
+                            fontSize = tablefontSize,
+                            weight = 2f
+                        )
+                        TableCell(
+                            text = weatherAttribute[5],
+                            fontSize = tablefontSize,
+                            bold = true,
+                            weight = 2f
+                        )
+                        TableCell(
+                            text = data.getWindDirection(index),
+                            fontSize = tablefontSize,
+                            weight = 2f
+                        )
                     }
                 }
-                Row(horizontalArrangement = Arrangement.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 4.dp)) {
+
+                // Display flight evaluation icon and text
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+                ) {
                     Icon(
                         painter = painterResource(evaluation.second),
-                        modifier = Modifier
-                            .size(24.dp),
+                        modifier = Modifier.size(24.dp),
                         contentDescription = null
                     )
                 }
 
-                Text(text = evaluation.third,
+                Text(
+                    text = evaluation.third,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 50.dp)
-                        .background(grayColorSemiTransparent, shape = RoundedCornerShape(16.dp)),
+                        .background(
+                            grayColorSemiTransparent,
+                            shape = RoundedCornerShape(16.dp)
+                        ),
                     fontSize = 17.sp,
                     textAlign = TextAlign.Center,
                     color = Color(android.graphics.Color.parseColor("#F24726"))
@@ -373,20 +454,37 @@ fun WeatherDialog(
             }
         }
     }
-
 }
 
+/**
+ * Composable function that displays the advisor dialog for a specific airspace.
+ *
+ * @param airSpaceData The list of airspace data.
+ * @param id The ID of the airspace for which to display the dialog.
+ * @param onDismiss The callback function to be invoked when the dialog is dismissed.
+ */
 @Composable
 fun AdvisorDialog(
     airSpaceData: SnapshotStateList<AirSpace>,
-    id:String,
+    id: String,
     onDismiss: () -> Unit,
-){
+) {
+    // Get the current context
     val context = LocalContext.current
+
+    // Create an instance of LocationViewModel
     val locationViewModel = LocationViewModel()
+
+    // Find the matching airspace based on the provided ID
     val airSpace = airSpaceData.firstOrNull { it.id == id }!!
-    locationViewModel.getAirMapRules(context,airSpace.ruleset_id)
+
+    // Fetch the AirMap rules for the airspace
+    locationViewModel.getAirMapRules(context, airSpace.ruleset_id)
+
+    // Observe the airspace rules from the LocationViewModel
     val airSpaceRules = locationViewModel.AirSpaceRule.observeAsState().value
+
+    // Display the advisor dialog
     Dialog(
         properties = DialogProperties(usePlatformDefaultWidth = true),
         onDismissRequest = onDismiss
@@ -400,34 +498,32 @@ fun AdvisorDialog(
             color = Color.White
         ) {
             Column() {
-                    Row(
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically,
+                // Display the header with a danger icon and title
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(color = Color.Cyan)
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_danger),
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .background(
-                                color = Color.Cyan
-                            )
-                    ) {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_danger),
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .padding(vertical = 8.dp),
-                                contentDescription = null
-                            )
-                            Text(
-                                text = "ZONA DE RESTRINCIÓN DE VUELO",
-                                modifier = Modifier
-                                    .padding(horizontal = 4.dp, vertical = 8.dp),
-                                fontSize = 15.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color(android.graphics.Color.parseColor("#F24726"))
-                            )
+                            .size(40.dp)
+                            .padding(vertical = 8.dp),
+                        contentDescription = null
+                    )
+                    Text(
+                        text = "ZONA DE RESTRINCIÓN DE VUELO",
+                        modifier = Modifier
+                            .padding(horizontal = 4.dp, vertical = 8.dp),
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(android.graphics.Color.parseColor("#F24726"))
+                    )
+                }
 
-
-                    }
-
+                // Display the airspace details in a LazyColumn
                 LazyColumn(
                     modifier = Modifier
                         .padding(horizontal = 16.dp)
@@ -445,6 +541,7 @@ fun AdvisorDialog(
                         AirSpaceText(text = "Región/Provincia : ${airSpace.state}")
                         Divider(color = Color.Gray, thickness = 1.dp)
                         AirSpaceText(text = "Ciudad : ${airSpace.city}")
+                        // Uncomment the following lines to display airspace rules
                         /*Divider(color = Color.Gray, thickness = 1.dp)
                         AirSpaceText(text = "Nombre del conjunto de avisos : \n${airSpaceRules?.name}")
                         Divider(color = Color.Gray, thickness = 1.dp)
@@ -453,11 +550,7 @@ fun AdvisorDialog(
                         AirSpaceText(text = "Tipos de zonas que aplica : \n${airSpaceRules?.airspace_types}")
                         Divider(color = Color.Gray, thickness = 1.dp)
                         AirSpaceText(text = "Avisos de la zona")
-                    }
-                    airSpaceRules?.rules?.size?.let { it ->
-                        items(it){itemIt->
-                            AirSpaceText(text = airSpaceRules.rules[itemIt].description)
-                        }*/
+                        */
                     }
                 }
             }
@@ -465,8 +558,14 @@ fun AdvisorDialog(
     }
 }
 
+
+/**
+ * Composable function that displays text for an airspace.
+ *
+ * @param text The text to be displayed.
+ */
 @Composable
-fun AirSpaceText(text:String){
+fun AirSpaceText(text: String) {
     Text(
         text = text,
         modifier = Modifier
@@ -477,9 +576,10 @@ fun AirSpaceText(text:String){
     )
 }
 
-
-/*@Preview(showBackground = true, showSystemUi = true)
+/*
+@Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun DialogPreview(){
-    AdvisorDialog(airSpace,onDismiss = {})
-}*/
+fun DialogPreview() {
+    AdvisorDialog(airSpace, onDismiss = {})
+}
+*/

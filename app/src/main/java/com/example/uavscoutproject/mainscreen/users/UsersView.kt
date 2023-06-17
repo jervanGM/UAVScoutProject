@@ -15,8 +15,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.uavscoutproject.mainscreen.home.HomeView
 
+/**
+ * Composable function for displaying the UsersView.
+ *
+ * @param navController The navigation controller used for navigating between screens.
+ */
 @Composable
 fun UsersView(navController: NavHostController) {
     Box(
@@ -37,9 +41,12 @@ fun UsersView(navController: NavHostController) {
     }
 }
 
+/**
+ * Composable function for previewing the UsersView.
+ */
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun UsersPreview(){
+fun UsersPreview() {
     val navController = rememberNavController()
     UsersView(navController)
 }

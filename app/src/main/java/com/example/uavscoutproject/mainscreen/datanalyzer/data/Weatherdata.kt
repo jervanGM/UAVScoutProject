@@ -2,13 +2,34 @@ package com.example.uavscoutproject.mainscreen.datanalyzer.data
 
 import com.example.uavscoutproject.R
 
+/**
+ * Represents the weather response.
+ *
+ * @property elevation The elevation.
+ * @property hourly The hourly data.
+ */
 data class WeatherResponse(
     val elevation: Double,
     val hourly: HourlyData
 )
 
+/**
+ * Represents the hourly weather data.
+ *
+ * @property id The ID.
+ * @property time The list of time values.
+ * @property temperature_2m The list of 2-meter temperatures.
+ * @property relativehumidity_2m The list of relative humidity values at 2 meters.
+ * @property precipitation_probability The list of precipitation probability values.
+ * @property weathercode The list of weather code values.
+ * @property surface_pressure The list of surface pressure values.
+ * @property visibility The list of visibility values.
+ * @property windspeed_10m The list of 10-meter wind speed values.
+ * @property winddirection_10m The list of 10-meter wind direction values.
+ * @property is_day The list of is_day values.
+ */
 data class HourlyData(
-    var id : String = "",
+    var id: String = "",
     val time: List<String> = listOf("0"),
     val temperature_2m: List<Double> = listOf(0.0),
     val relativehumidity_2m: List<Int> = listOf(0),
@@ -19,33 +40,47 @@ data class HourlyData(
     val windspeed_10m: List<Double> = listOf(0.0),
     val winddirection_10m: List<Double> = listOf(0.0),
     val is_day: List<Double> = listOf(0.0)
-){
-    fun getWeatherIcon(index : Int) : Int {
+) {
+    /**
+     * Returns the weather icon for the given index.
+     *
+     * @param index The index of the weather data.
+     * @return The resource ID of the weather icon.
+     */
+    fun getWeatherIcon(index: Int): Int {
         val weatherCode = weathercode[index]
         val isDay = is_day[index] == 1.0
-        val weatherIcon = when{
+        val weatherIcon = when {
             weatherCode == 0 ->
-                if(isDay) R.drawable.ic_sunny
+                if (isDay) R.drawable.ic_sunny
                 else R.drawable.ic_night
             (weatherCode in setOf(1, 2, 3)) ->
-                if(isDay ) R.drawable.ic_cloudy
+                if (isDay) R.drawable.ic_cloudy
                 else R.drawable.ic_night_cloudy
-            (weatherCode in setOf(45,48)) -> {
-                if(isDay) R.drawable.ic_fog
+            (weatherCode in setOf(45, 48)) -> {
+                if (isDay) R.drawable.ic_fog
                 else R.drawable.ic_fog_night
             }
-            (weatherCode in setOf(51,53,55,56,57,61,63,65,66,67,80,81,82)) -> R.drawable.ic_rainy
-            (weatherCode in setOf(77,85,86)) -> R.drawable.ic_snow
-            (weatherCode in setOf(95,96,99)) -> R.drawable.ic_thunderstorm
+            (weatherCode in setOf(51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82)) ->
+                R.drawable.ic_rainy
+            (weatherCode in setOf(77, 85, 86)) -> R.drawable.ic_snow
+            (weatherCode in setOf(95, 96, 99)) -> R.drawable.ic_thunderstorm
             else -> R.drawable.ic_wind
         }
         return weatherIcon
     }
-    fun getWindDirection(index : Int) : String {
+
+    /**
+     * Returns the wind direction for the given index.
+     *
+     * @param index The index of the weather data.
+     * @return The wind direction.
+     */
+    fun getWindDirection(index: Int): String {
         val windDegrees = winddirection_10m[index]
         val range = 22.5
         val rangeVar = 22.49
-        val direction = when{
+        val direction = when {
             (windDegrees in (360 - rangeVar)..(0 + range)) -> "E"
             (windDegrees in (45 - rangeVar)..(45 + range)) -> "NE"
             (windDegrees in (90 - rangeVar)..(90 + range)) -> "N"
@@ -59,7 +94,13 @@ data class HourlyData(
         return direction
     }
 
-    fun evaluateFlightPossibility( index: Int ): Triple<Int, Int, String> {
+    /**
+     * Evaluates the flight possibility based on the weather conditions at the given index.
+     *
+     * @param index The index of the weather data.
+     * @return A triple containing the color, warning icon, and flight possibility message.
+     */
+    fun evaluateFlightPossibility(index: Int): Triple<Int, Int, String> {
         // Acceptable ranges for each weather condition
         val temperatureRange = 5.0..35.0
         val relativeHumidityRange = 20..60
@@ -74,7 +115,7 @@ data class HourlyData(
         if (temperature_2m[index] in temperatureRange) {
             totalScore += 2
         } else {
-            totalScore += 0
+            //Is not adding points
         }
 
         // Evaluate relative humidity
@@ -121,39 +162,43 @@ data class HourlyData(
 
         // Final evaluation of the total score
         return when {
-            totalScore >= 8 -> {
-                Triple(android.graphics.Color.parseColor("#66FBB0"),
-                       R.drawable.ic_void,
-                                    "Clima estable.\n" +
-                        "Se puede volar respetando la normativa vigente ")
-            }
-            totalScore in 4..7 -> {
-                Triple(android.graphics.Color.parseColor("#FDAB48"),
-                    R.drawable.ic_warning,
-                                "Clima moderadamente inestable.\n" +
-                            "Se recomienda volar con precaución y en altitudes bajas ")
-            }
-            else -> {
-                Triple(android.graphics.Color.parseColor("#FF6347"),
-                    R.drawable.ic_danger,
-                                    "Clima inestable.\n" +
-                            "No se recomienda volar en la zona bajo ningun concepto")
-            }
+            totalScore >= 8 -> Triple(
+                android.graphics.Color.parseColor("#66FBB0"),
+                R.drawable.ic_void,
+                "Clima estable.\nSe puede volar respetando la normativa vigente."
+            )
+            totalScore in 4..7 -> Triple(
+                android.graphics.Color.parseColor("#FDAB48"),
+                R.drawable.ic_warning,
+                "Clima moderadamente inestable.\nSe recomienda volar con precaución y en altitudes bajas."
+            )
+            else -> Triple(
+                android.graphics.Color.parseColor("#FF6347"),
+                R.drawable.ic_danger,
+                "Clima inestable.\nNo se recomienda volar en la zona bajo ningún concepto."
+            )
         }
     }
 
-    fun getDayWeatherData(option :String) :Pair<Int,Int> {
-        val startIndex = when{
+    /**
+     * Returns the start and end index of the weather data based on the selected option.
+     *
+     * @param option The selected option ("Hoy", "Mañana", or "Otros").
+     * @return A pair containing the start and end index of the weather data.
+     */
+    fun getDayWeatherData(option: String): Pair<Int, Int> {
+        val startIndex = when {
             option == "Hoy" -> 0
-            option == "Mañana" ->24
+            option == "Mañana" -> 24
             else -> 48
         }
-        val endIndex = when{
+        val endIndex = when {
             option == "Hoy" -> 23
-            option == "Mañana" ->47
+            option == "Mañana" -> 47
             else -> 71
         }
-        return Pair(startIndex,endIndex)
+        return Pair(startIndex, endIndex)
     }
 }
+
 

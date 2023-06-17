@@ -41,16 +41,29 @@ import androidx.navigation.compose.rememberNavController
 import com.example.uavscoutproject.R
 import com.example.uavscoutproject.navigation.AppScreens
 
+/**
+ * Composable function for the Forgot Password screen.
+ *
+ * @param navController The navigation controller for navigating between screens.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ForgotPasswordScreen(navController: NavHostController) {
     ForgotPassword(navController)
 }
 
+/**
+ * Composable function for the Forgot Password UI.
+ *
+ * @param navController The navigation controller for navigating between screens.
+ * @param viewModel The view model for the Authentication Screen.
+ */
 @ExperimentalMaterial3Api
 @Composable
-fun ForgotPassword(navController: NavHostController,
-                   viewModel: AuthenticationScreenViewModel = androidx.lifecycle.viewmodel.compose.viewModel()) {
+fun ForgotPassword(
+    navController: NavHostController,
+    viewModel: AuthenticationScreenViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+) {
     val email = remember { mutableStateOf("") }
     val fontSize = 17.sp
     val context = LocalContext.current
@@ -92,7 +105,7 @@ fun ForgotPassword(navController: NavHostController,
                         "Scout",
                         fontWeight = FontWeight.Bold,
                         fontSize = fontSize,
-                        color = androidx.compose.ui.graphics.Color.Black
+                        color = Color.Black
                     )
                 }
                 Column(
@@ -104,7 +117,7 @@ fun ForgotPassword(navController: NavHostController,
                         "Le enviaremos las instrucciones en el siguiente email:",
                         fontWeight = FontWeight.Medium,
                         fontSize = 18.sp,
-                        color = androidx.compose.ui.graphics.Color.White
+                        color = Color.White
                     )
                 }
             }
@@ -119,10 +132,10 @@ fun ForgotPassword(navController: NavHostController,
                     onValueChange = { email.value = it },
                     shape = RoundedCornerShape(10.dp),
                     colors = TextFieldDefaults.textFieldColors(
-                        containerColor = androidx.compose.ui.graphics.Color.White,
+                        containerColor = Color.White,
                         focusedIndicatorColor =
                         Color(android.graphics.Color.parseColor("#414BB2")),
-                        unfocusedIndicatorColor = androidx.compose.ui.graphics.Color.Gray,
+                        unfocusedIndicatorColor = Color.Gray,
                         focusedLabelColor =
                         Color(android.graphics.Color.parseColor("#414BB2"))
                     ),
@@ -131,7 +144,7 @@ fun ForgotPassword(navController: NavHostController,
                         keyboardType = KeyboardType.Email,
                         imeAction = ImeAction.Next
                     ),
-                    textStyle = TextStyle(color = androidx.compose.ui.graphics.Color.Black),
+                    textStyle = TextStyle(color = Color.Black),
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 16.dp)
@@ -146,20 +159,20 @@ fun ForgotPassword(navController: NavHostController,
                 // Sign in button
                 Button(
                     onClick = {
-                                    navController.navigate(AppScreens.AuthenticationScreen.route) {
-                                        anim {
-                                            exit = android.R.anim.fade_out
-                                            popExit = android.R.anim.fade_out
-                                        }
-                                    }
-                              },
+                        navController.navigate(AppScreens.AuthenticationScreen.route) {
+                            anim {
+                                exit = android.R.anim.fade_out
+                                popExit = android.R.anim.fade_out
+                            }
+                        }
+                    },
                     shape = RoundedCornerShape(10.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = androidx.compose.ui.graphics.Color.White,
+                        containerColor = Color.White,
                         contentColor =
                         Color(android.graphics.Color.parseColor("#414BB2"))
                     ),
-                    border= BorderStroke(2.dp, androidx.compose.ui.graphics.Color.LightGray),
+                    border = BorderStroke(2.dp, Color.LightGray),
                     modifier = Modifier
                         .weight(1f)
                         .padding(end = 8.dp)
@@ -170,9 +183,9 @@ fun ForgotPassword(navController: NavHostController,
                 // Sign up button
                 Button(
                     onClick = {
-                                viewModel.resetPassword(email.value,context)
-                                email.value = ""
-                              },
+                        viewModel.resetPassword(email.value, context)
+                        email.value = ""
+                    },
                     shape = RoundedCornerShape(10.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor =
@@ -190,9 +203,12 @@ fun ForgotPassword(navController: NavHostController,
     }
 }
 
+/**
+ * Preview function for the Forgot Password screen.
+ */
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun ForgotPasswordScreenPreview(){
+fun ForgotPasswordScreenPreview() {
     val navController = rememberNavController()
     ForgotPasswordScreen(navController)
 }

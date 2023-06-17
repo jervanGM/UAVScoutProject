@@ -30,6 +30,14 @@ import com.example.uavscoutproject.mainscreen.location.viewmodel.LocationViewMod
 import com.example.uavscoutproject.navigation.AppScreens
 import com.example.uavscoutproject.preferences.MyPreferences
 
+/**
+ * Composable function that displays the splash screen.
+ *
+ * @param navController The navigation controller used for navigating between screens.
+ * @param authenticationviewModel The view model for the authentication screen.
+ * @param droneViewModel The view model for drone data.
+ * @param locationViewModel The view model for location data.
+ */
 @Composable
 fun SplashScreen(
     navController: NavHostController,
@@ -38,20 +46,24 @@ fun SplashScreen(
     locationViewModel: LocationViewModel
 ) {
     val context = LocalContext.current
-    LaunchedEffect(key1 = true) { //Temporal, si es necesario realizar tareas en segundo plano se debe editar
+
+    // Perform necessary tasks in the background
+    LaunchedEffect(key1 = true) {
         droneViewModel.getDroneData()
         locationViewModel.getAirSpacesFromDB()
         newsDroneApi(context)
-        val navigate = if(authenticationviewModel.isLoggedIn())
-                        {
-                            val cloudSave = !MyPreferences(context)
-                                .getBooleanSetting("isLocal")
-                            droneViewModel.getRouteData(cloudSave = cloudSave
-                            )
-                            droneViewModel.getPersonalDroneData(cloudSave = cloudSave)
-                            AppScreens.MainScreen.route
-                        }
-                       else AppScreens.AuthenticationScreen.route
+
+        // Determine the next screen to navigate to based on the user's authentication status
+        val navigate = if (authenticationviewModel.isLoggedIn()) {
+            val cloudSave = !MyPreferences(context).getBooleanSetting("isLocal")
+            droneViewModel.getRouteData(cloudSave = cloudSave)
+            droneViewModel.getPersonalDroneData(cloudSave = cloudSave)
+            AppScreens.MainScreen.route
+        } else {
+            AppScreens.AuthenticationScreen.route
+        }
+
+        // Navigate to the next screen
         navController.popBackStack()
         navController.navigate(navigate) {
             popUpTo(AppScreens.SplashScreen.route) {
@@ -64,15 +76,21 @@ fun SplashScreen(
             }
         }
     }
+
+    // Display the splash screen UI
     Splash()
 }
 
+/**
+ * Composable function that displays the UI for the splash screen.
+ */
 @Composable
 fun Splash() {
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier.fillMaxSize()
     ) {
+        // Display the UAVScout logo
         Image(
             painter = painterResource(id = R.drawable.logo),
             contentDescription = "Logo UAVScout",
@@ -80,6 +98,8 @@ fun Splash() {
                 .size(150.dp, 150.dp)
                 .align(Alignment.Center)
         )
+
+        // Display the "UAV" and "Scout" text below the logo
         Box(
             contentAlignment = Alignment.BottomCenter,
             modifier = Modifier.fillMaxSize()
@@ -89,12 +109,14 @@ fun Splash() {
                 modifier = Modifier.padding(bottom = 50.dp)
             ) {
                 val fontSize = 19
+
                 Text(
                     "UAV",
                     fontWeight = FontWeight.Bold,
-                    fontSize = fontSize.sp ,
+                    fontSize = fontSize.sp,
                     color = Color(android.graphics.Color.parseColor("#12CDD4"))
                 )
+
                 Text(
                     "Scout",
                     fontWeight = FontWeight.Bold,
@@ -106,10 +128,17 @@ fun Splash() {
     }
 }
 
+/**
+ * Performs an API call to retrieve drone articles and inserts them into the database.
+ *
+ * @param context The application context.
+ */
 suspend fun newsDroneApi(context: Context) {
     val response = RetrofitClient.newsApiService.getDroneArticles(context.getString(R.string.news_api_key))
+
     if (response.isSuccessful) {
         val articles = response.body()?.articles
+
         if (!articles.isNullOrEmpty()) {
             ArticleComposer.insertList(articles)
         }

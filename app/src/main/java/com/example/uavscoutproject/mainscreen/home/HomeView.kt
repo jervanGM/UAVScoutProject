@@ -74,33 +74,49 @@ import java.time.Duration
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
+/**
+ * Composable function that represents the home view of the app.
+ * @param navController The navigation controller used for navigating between screens.
+ * @param locationViewModel The view model for location data.
+ * @param droneViewModel The view model for drone data.
+ */
 @Composable
-fun HomeView(navController: NavHostController,
-             locationViewModel: LocationViewModel = viewModel(),
-             droneViewModel: DroneViewModel = viewModel()) {
+fun HomeView(
+    navController: NavHostController,
+    locationViewModel: LocationViewModel = viewModel(),
+    droneViewModel: DroneViewModel = viewModel()
+) {
     val scrollState = rememberLazyListState()
     val droneList by remember { mutableStateOf(droneViewModel.getList()) }
 
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(start = 8.dp, bottom = 16.dp),
-            state = scrollState
-        ) {
-            item { DronesSection(navController,droneList, droneViewModel) }
-            item { LastFlightSection(locationViewModel) }
-            item { NewsSection(navController) }
-        }
-
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(start = 8.dp, bottom = 16.dp),
+        state = scrollState
+    ) {
+        item { DronesSection(navController, droneList, droneViewModel) }
+        item { LastFlightSection(locationViewModel) }
+        item { NewsSection(navController) }
+    }
 }
 
+/**
+ * Composable function for previewing the HomeView.
+ */
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun HomePreview(){
+fun HomePreview() {
     val navController = rememberNavController()
     HomeView(navController)
 }
 
+/**
+ * Composable function that represents the section for displaying drone items.
+ * @param navController The navigation controller used for navigating between screens.
+ * @param droneList The list of drones to display.
+ * @param droneViewModel The view model for drone data.
+ */
 @Composable
 fun DronesSection(
     navController: NavHostController,
@@ -124,8 +140,10 @@ fun DronesSection(
             )
             Spacer(Modifier.weight(1f))
             IconButton(
-                onClick = { navController.navigate(AppScreens.DroneMakingScreen.route +
-                        "?edit=$NOTEDIT&index=$FALSEINDEX")},
+                onClick = {
+                    navController.navigate(AppScreens.DroneMakingScreen.route +
+                            "?edit=$NOTEDIT&index=$FALSEINDEX")
+                },
                 modifier = Modifier.size(32.dp)
             ) {
                 Icon(
@@ -136,32 +154,47 @@ fun DronesSection(
             }
         }
         droneList.forEachIndexed { index, drone ->
-            DroneItem(drone, index,
+            DroneItem(
+                drone,
+                index,
                 onEdit = { editedIndex ->
                     navController.navigate(AppScreens.DroneMakingScreen.route +
-                    "?edit=$EDIT&index=$editedIndex")
+                            "?edit=$EDIT&index=$editedIndex")
                 },
                 onItemRemoved = { removedIndex ->
                     droneViewModel.savePersonalDroneData(
                         cloudSave = false,
                         localMode = DroneViewModel.LocalMode.DELETE,
-                        localIndex = droneViewModel.getItem(removedIndex))
+                        localIndex = droneViewModel.getItem(removedIndex)
+                    )
                     droneViewModel.deleteDrone(removedIndex)
                 }
             )
         }
-
     }
 }
 
 
 
+/**
+ * Composable function that displays a drone item.
+ *
+ * @param dronedata The drone data object to be displayed.
+ * @param index The index of the drone item.
+ * @param onEdit Callback function when the item is edited.
+ * @param onItemRemoved Callback function when the item is removed.
+ */
 @Composable
-fun DroneItem(dronedata: Dronedata,
-              index: Int,
-              onEdit: (Int) -> Unit,
-              onItemRemoved: (Int) -> Unit) {
+fun DroneItem(
+    dronedata: Dronedata,
+    index: Int,
+    onEdit: (Int) -> Unit,
+    onItemRemoved: (Int) -> Unit
+) {
+    // State to control the visibility of the drone dialog
     var show by remember { mutableStateOf(false) }
+
+    // Composable row representing the drone item
     Row(
         Modifier
             .fillMaxWidth()
@@ -174,10 +207,12 @@ fun DroneItem(dronedata: Dronedata,
             .clickable(onClick = { show = true }),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        // Show drone dialog if the item is clicked and show is true
         if(show){
             DroneDialog(dronedata, onDismiss = {show = false})
         }
 
+        // Display the image if the image URI is not null or empty
         if (dronedata.imgUri != null && dronedata.imgUri != "") {
             val selectedImageUri = dronedata.imgUri.toUri()
             val context = LocalContext.current
@@ -192,7 +227,7 @@ fun DroneItem(dronedata: Dronedata,
                 }
             when (imagePainter) {
                 is AsyncImagePainter -> {
-                    // La variable `imagePainter` es un ImagePainter
+                    // Display the image if it is an ImagePainter
                     Image(
                         painter = imagePainter,
                         contentDescription = "Default image",
@@ -209,7 +244,7 @@ fun DroneItem(dronedata: Dronedata,
                 }
 
                 is ImageBitmap -> {
-                    // La variable `imagePainter` es un Bitmap
+                    // Display the image if it is an ImageBitmap
                     Image(
                         bitmap = imagePainter.asAndroidBitmap().asImageBitmap(),
                         contentDescription = "Default image",
@@ -225,9 +260,8 @@ fun DroneItem(dronedata: Dronedata,
                     )
                 }
             }
-        }
-        else{
-            // La variable `imagePainter` no es ni un ImagePainter ni un Bitmap
+        } else {
+            // Display a default image if the image URI is null or empty
             Image(
                 painter = painterResource(R.drawable.no_image),
                 contentDescription = "Default image",
@@ -237,10 +271,12 @@ fun DroneItem(dronedata: Dronedata,
                     .padding(start = 8.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
             )
         }
+
+        // Display drone details in a column
         Column(Modifier.weight(1f),
-               verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(
-                text = "Aeronave : ${dronedata.vehicle}",
+                text = "Aeronave: ${dronedata.vehicle}",
                 fontSize = 14.sp,
                 color = Color(android.graphics.Color.parseColor("#808080"))
             )
@@ -252,8 +288,10 @@ fun DroneItem(dronedata: Dronedata,
             Text(text = "Sample text", fontSize = 14.sp)
             Text(text = "ID: ${dronedata.serial}", fontSize = 14.sp)
         }
+
+        // Display action buttons in a column
         Column(modifier = Modifier.padding(horizontal = 12.dp),
-               verticalArrangement = Arrangement.spacedBy(24.dp)) {
+            verticalArrangement = Arrangement.spacedBy(24.dp)) {
             IconButton(
                 onClick = { onItemRemoved(index) },
                 modifier = Modifier
@@ -282,8 +320,13 @@ fun DroneItem(dronedata: Dronedata,
     }
 }
 
+/**
+ * Composable function that displays the last flight section.
+ *
+ * @param locationViewModel The location view model to use.
+ */
 @Composable
-fun LastFlightSection(locationViewModel: LocationViewModel = androidx.lifecycle.viewmodel.compose.viewModel()) {
+fun LastFlightSection(locationViewModel: LocationViewModel = viewModel()) {
     val flightAttribute = listOf("Ruta", "Distancia recorrida",
         "Tiempo de vuelo", "Clima")
 
@@ -294,6 +337,7 @@ fun LastFlightSection(locationViewModel: LocationViewModel = androidx.lifecycle.
         "${RouteMaker.getTime()} min",
         RouteMaker.getWeather()
     ) // clase de datos
+
     Column(Modifier.padding(horizontal = 16.dp)) {
         Row(
             Modifier
@@ -314,7 +358,7 @@ fun LastFlightSection(locationViewModel: LocationViewModel = androidx.lifecycle.
                     locationViewModel.locationDataList.addAll(RouteMaker.getRoute())
                     locationViewModel.alterLocationList.clear()
                     locationViewModel.alterLocationList.addAll(RouteMaker.getRoute())
-                          },
+                },
                 shape = RoundedCornerShape(4.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor =
@@ -333,6 +377,8 @@ fun LastFlightSection(locationViewModel: LocationViewModel = androidx.lifecycle.
                 Text(text = "Volar", fontSize = 12.sp)
             }
         }
+
+        // Display flight attributes and data
         flightAttribute.forEachIndexed { index, attribute ->
             Row(
                 Modifier
@@ -346,6 +392,15 @@ fun LastFlightSection(locationViewModel: LocationViewModel = androidx.lifecycle.
     }
 }
 
+/**
+ * Composable function that displays a table cell.
+ *
+ * @param text The text to display in the cell.
+ * @param fontSize The font size of the text.
+ * @param bold Whether the text should be bold.
+ * @param weight The weight of the cell.
+ * @param center Whether the text should be centered.
+ */
 @Composable
 fun RowScope.TableCell(text: String, fontSize: TextUnit, bold:Boolean = false, weight: Float, center: Boolean = false) {
     Text(
@@ -360,6 +415,12 @@ fun RowScope.TableCell(text: String, fontSize: TextUnit, bold:Boolean = false, w
     )
 }
 
+/**
+ * Modifier extension function to add top and bottom borders to a composable.
+ *
+ * @param strokeWidth The width of the border.
+ * @param color The color of the border.
+ */
 fun Modifier.topBottomBorder(strokeWidth: Dp, color: Color) = composed(
     factory = {
         val density = LocalDensity.current
@@ -386,17 +447,23 @@ fun Modifier.topBottomBorder(strokeWidth: Dp, color: Color) = composed(
     }
 )
 
+/**
+ * Composable function that displays the news section.
+ *
+ * @param navController The navigation controller.
+ */
 @Composable
 fun NewsSection(navController: NavHostController) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val articles = ArticleComposer.getList()
+
     Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
-            Text(
-                text = "Noticias destacadas",
-                fontWeight = FontWeight.Bold,
-                fontSize = 24.sp
-            )
+        Text(
+            text = "Noticias destacadas",
+            fontWeight = FontWeight.Bold,
+            fontSize = 24.sp
+        )
         Column(Modifier.fillMaxWidth()) {
             articles.take(20).chunked(2).forEach { fila ->
                 Row(Modifier.fillMaxWidth()) {
@@ -415,7 +482,13 @@ fun NewsSection(navController: NavHostController) {
     }
 }
 
-
+/**
+ * Composable function that displays a highlighted news article.
+ *
+ * @param modifier The modifier for the composable.
+ * @param onClick The click listener for the article.
+ * @param article The article data.
+ */
 @Composable
 fun NoticiaDestacada(modifier: Modifier = Modifier, onClick: () -> Unit, article: Article) {
     val formatter = DateTimeFormatter.ISO_DATE_TIME

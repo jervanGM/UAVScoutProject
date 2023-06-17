@@ -1,17 +1,29 @@
 package com.example.uavscoutproject.mainscreen.location.data
 
-import android.util.Log
-import com.mapbox.mapboxsdk.geometry.LatLng
 import org.osmdroid.util.GeoPoint
-import java.text.DecimalFormat
-import kotlin.reflect.jvm.internal.impl.load.kotlin.JvmType
 
 
+/**
+ * Represents the response received from the AirSpace API.
+ * @property status The status of the response.
+ * @property data The list of airspaces returned in the response.
+ */
 data class AirSpaceResponse(
     val status: String,
     val data: List<AirSpace>
 )
 
+/**
+ * Represents an airspace.
+ * @property id The ID of the airspace.
+ * @property name The name of the airspace.
+ * @property type The type of the airspace.
+ * @property country The country of the airspace.
+ * @property state The state of the airspace.
+ * @property city The city of the airspace.
+ * @property geometry The geometry of the airspace.
+ * @property ruleset_id The ID of the ruleset.
+ */
 data class AirSpace(
     val id: String,
     val name: String,
@@ -22,6 +34,10 @@ data class AirSpace(
     val geometry: AirSpaceGeometry,
     val ruleset_id: String
 ) {
+    /**
+     * Converts the AirSpace object to a map representation.
+     * @return The map representation of the AirSpace object.
+     */
     fun toMap(): Map<String, Any> {
         return mapOf(
             "id" to id,
@@ -30,7 +46,7 @@ data class AirSpace(
             "country" to country,
             "state" to state,
             "city" to city,
-            "geometry" to geometry.coordinates.toPolygon().mapIndexed{ index, coordinates ->
+            "geometry" to geometry.coordinates.toPolygon().mapIndexed { index, coordinates ->
                 "item$index" to coordinates
             }.toMap(),
             "ruleset_id" to ruleset_id
@@ -38,10 +54,20 @@ data class AirSpace(
     }
 }
 
+/**
+ * Represents the geometry of an airspace.
+ * @property coordinates The coordinates of the airspace geometry.
+ * @property polygons The list of polygons representing the airspace geometry.
+ */
 data class AirSpaceGeometry(
     val coordinates: List<List<List<Double>>> = emptyList(),
-    val polygons : List<GeoPoint>
+    val polygons: List<GeoPoint>
 )
+
+/**
+ * Extension function to convert a list of lists of doubles to a list of GeoPoint objects representing a polygon.
+ * @return The list of GeoPoint objects representing the polygon.
+ */
 fun List<List<List<Double>>>.toPolygon(): MutableList<GeoPoint> {
     val polygons: MutableList<GeoPoint> = mutableListOf()
 

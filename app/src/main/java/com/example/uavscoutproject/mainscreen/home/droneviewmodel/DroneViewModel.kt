@@ -19,6 +19,11 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 
+/**
+ * The DroneViewModel class is responsible for managing drone data and interacting with the database and cloud storage.
+ *
+ * @property application The application instance.
+ */
 @Suppress("UNCHECKED_CAST", "SENSELESS_COMPARISON")
 class DroneViewModel(application: Application) : AndroidViewModel(application) {
     private val database = (application as UAVScoutApp).database
@@ -27,39 +32,80 @@ class DroneViewModel(application: Application) : AndroidViewModel(application) {
     private var firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
     private val user = FirebaseAuth.getInstance().currentUser
 
+    /**
+     * Enum class representing local mode options.
+     */
     enum class LocalMode {
         SAVE, UPDATE, DELETE
     }
 
+    /**
+     * Initializes the Firestore settings.
+     */
     init {
         firestore.firestoreSettings = FirebaseFirestoreSettings.Builder().build()
     }
 
+    /**
+     * Adds a new drone to the drone list using the DroneMaker object.
+     *
+     * @param newDrone The new drone to add.
+     */
     fun addDrone(newDrone: Dronedata) {
         DroneMaker.addDrone(newDrone)
     }
 
+    /**
+     * Edits the drone at the specified index with the edited drone data using the DroneMaker object.
+     *
+     * @param index The index of the drone to edit.
+     * @param editedDrone The edited drone data.
+     */
     fun editDrone(index: Int, editedDrone: Dronedata) {
-        DroneMaker.editDrone(index,editedDrone)
+        DroneMaker.editDrone(index, editedDrone)
     }
 
+    /**
+     * Deletes the drone at the specified index using the DroneMaker object.
+     *
+     * @param index The index of the drone to delete.
+     */
     fun deleteDrone(index: Int) {
         DroneMaker.deleteDrone(index)
     }
 
+    /**
+     * Retrieves the drone at the specified index from the DroneMaker object.
+     *
+     * @param index The index of the drone to retrieve.
+     * @return The drone at the specified index.
+     */
     fun getItem(index: Int): Dronedata {
         return DroneMaker.getItem(index)
     }
 
+    /**
+     * Retrieves the list of drones from the DroneMaker object.
+     *
+     * @return The list of drones.
+     */
     fun getList(): List<Dronedata> {
         return DroneMaker.getList()
     }
 
-    fun getDBList(): List<Dronedata>{
+    /**
+     * Retrieves the list of drones from the DroneMaker object.
+     *
+     * @return The list of drones.
+     */
+    fun getDBList(): List<Dronedata> {
         return DroneMaker.getDBList()
     }
 
-    fun getDroneData(){
+    /**
+     * Retrieves the drone data from Firestore and updates the drone list in the DroneMaker object.
+     */
+    fun getDroneData() {
         val document = firestore
             .collection("dronesdata")
             .document("comertial_drones")
@@ -80,7 +126,7 @@ class DroneViewModel(application: Application) : AndroidViewModel(application) {
                     DroneMaker.setDBList(droneList)
                 }
             } else {
-                // El documento no existe
+                // The document doesn't exist
             }
         }
         handle.addOnFailureListener {
@@ -88,8 +134,12 @@ class DroneViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-
-    suspend fun getPersonalDroneData(cloudSave:Boolean = true) {
+    /**
+     * Retrieves the personal drone data from Firestore or local database, based on the cloudSave parameter.
+     *
+     * @param cloudSave Indicates whether to retrieve data from Firestore (true) or local database (false).
+     */
+    suspend fun getPersonalDroneData(cloudSave: Boolean = true) {
         if (cloudSave) {
             val document = firestore
                 .collection("dronesdata")
@@ -111,45 +161,65 @@ class DroneViewModel(application: Application) : AndroidViewModel(application) {
                         DroneMaker.setList(droneList)
                     }
                 } else {
-                    // El documento no existe
+                    // The document doesn't exist
                 }
             }
             handle.addOnFailureListener {
                 Log.d("Firebase", "Get failed $it ")
             }
-        }
-        else{
+        } else {
             viewModelScope.launch {
                 val drones = droneDao.getAll()
-                if (drones.isNotEmpty()){
+                if (drones.isNotEmpty()) {
                     DroneMaker.setList(drones)
                 }
             }
         }
     }
 
-    private suspend fun saveLocalPersonalDroneData(drone: Dronedata){
-
+    /**
+     * Saves the local personal drone data in the local database.
+     *
+     * @param drone The drone data to update.
+     */
+    private suspend fun saveLocalPersonalDroneData(drone: Dronedata) {
         droneDao.insert(drone)
         Log.d("SQLite", "Data saved")
     }
 
+    /**
+     * Updates the local personal drone data in the local database.
+     *
+     * @param drone The drone data to update.
+     */
     private suspend fun updateLocalPersonalDroneData(drone: Dronedata) {
         droneDao.update(drone)
         Log.d("SQLite", "Data updated")
     }
 
+    /**
+     * Deletes the local personal drone data from the local database.
+     *
+     * @param drone The drone data to delete.
+     */
     private suspend fun deleteLocalPersonalDroneData(drone: Dronedata) {
         droneDao.delete(drone)
         Log.d("SQLite", "Data deleted")
     }
 
+    /**
+     * Saves the personal drone data locally or in Firestore, based on the cloudSave parameter and localMode.
+     *
+     * @param cloudSave Indicates whether to save data in Firestore (true) or locally (false).
+     * @param localMode The local mode for saving data.
+     * @param localIndex The local index for saving data.
+     */
     fun savePersonalDroneData(
-        cloudSave:Boolean = true,
-        localMode : LocalMode = LocalMode.SAVE,
-        localIndex : Dronedata = Dronedata()
-    ){
-        if(cloudSave) {
+        cloudSave: Boolean = true,
+        localMode: LocalMode = LocalMode.SAVE,
+        localIndex: Dronedata = Dronedata()
+    ) {
+        if (cloudSave) {
             val droneData = DroneMaker.getList()
             val document =
                 firestore.collection("dronesdata").document("personal_drones_${user?.uid}")
@@ -164,10 +234,9 @@ class DroneViewModel(application: Application) : AndroidViewModel(application) {
             handle.addOnFailureListener {
                 Log.d("Firebase", "Save failed $it ")
             }
-        }
-        else{
+        } else {
             viewModelScope.launch(Dispatchers.IO) {
-                when(localMode){
+                when (localMode) {
                     LocalMode.SAVE -> saveLocalPersonalDroneData(localIndex)
                     LocalMode.UPDATE -> updateLocalPersonalDroneData(localIndex)
                     LocalMode.DELETE -> deleteLocalPersonalDroneData(localIndex)
@@ -176,7 +245,12 @@ class DroneViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-
+    /**
+     * Converts a JSON array to a list of drone data objects.
+     *
+     * @param jsonArray The JSON array to convert.
+     * @return The list of drone data objects.
+     */
     private fun convertJsonToDronedataList(jsonArray: JSONArray): List<Dronedata> {
         val dronedataList = mutableListOf<Dronedata>()
 
@@ -213,23 +287,39 @@ class DroneViewModel(application: Application) : AndroidViewModel(application) {
         return dronedataList
     }
 
-    private suspend fun saveLocalRouteData(route: LastRoute){
-
+    /**
+     * Saves the local route data to the local database.
+     *
+     * @param route The route data to save.
+     */
+    private suspend fun saveLocalRouteData(route: LastRoute) {
         routeDao.insert(route)
         Log.d("SQLite", "Data saved")
     }
 
+    /**
+     * Updates the local route data in the local database.
+     *
+     * @param route The route data to update.
+     */
     private suspend fun updateLocalRouteData(route: LastRoute) {
         routeDao.update(route)
         Log.d("SQLite", "Data updated")
     }
 
+    /**
+     * Saves the route data locally or in Firestore, based on the cloudSave parameter and localMode.
+     *
+     * @param cloudSave Indicates whether to save data in Firestore (true) or locally (false).
+     * @param localMode The local mode for saving data.
+     * @param route The route data to save.
+     */
     fun saveRouteData(
-        cloudSave:Boolean = true,
-        localMode : LocalMode = LocalMode.SAVE,
-        route : LastRoute = LastRoute()
-    ){
-        if(cloudSave) {
+        cloudSave: Boolean = true,
+        localMode: LocalMode = LocalMode.SAVE,
+        route: LastRoute = LastRoute()
+    ) {
+        if (cloudSave) {
             val document =
                 firestore.collection("lastroute").document("last_route_${user?.uid}")
 
@@ -251,18 +341,23 @@ class DroneViewModel(application: Application) : AndroidViewModel(application) {
                 .addOnFailureListener {
                     Log.d("Firebase", "Save failed $it")
                 }
-        }
-        else{
+        } else {
             viewModelScope.launch(Dispatchers.IO) {
-                when(localMode){
+                when (localMode) {
                     LocalMode.SAVE -> saveLocalRouteData(route)
                     LocalMode.UPDATE -> updateLocalRouteData(route)
-                    else -> Log.d("SQLite", "SQLite DB mode error")
+                    LocalMode.DELETE -> {
+                        // Not implemented
+                    }
                 }
             }
         }
     }
-
+    /**
+     * Retrieves the route data from Firestore or local database, based on the cloudSave parameter.
+     *
+     * @param cloudSave Indicates whether to retrieve data from Firestore (true) or local database (false).
+     */
     @SuppressLint("SuspiciousIndentation")
     suspend fun getRouteData(cloudSave:Boolean = true) {
         if (cloudSave) {
@@ -301,27 +396,42 @@ class DroneViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
     }
+    /**
+     * Converts route data in JSON format to a list of [GeocodeItem] objects.
+     *
+     * @param routeData The route data in JSON format as a [Map] of key-value pairs.
+     * @return A list of [GeocodeItem] objects representing the converted route data.
+     */
     private fun convertJsonToGeocodeItemList(routeData: Map<String, Any>?): List<GeocodeItem> {
         val geocodeItemList = mutableListOf<GeocodeItem>()
+
+        // Check if routeData is not null
         if (routeData != null) {
             for (item in routeData) {
                 val attrs = item.value as Map<String, Any>?
                 val positions = attrs?.get("position") as Map<String, Any>?
-                val geoitem = GeocodeItem(
-                    attrs?.get("title") as String,
-                    Position(
-                        positions?.get("lat") as Double,
-                        positions["lng"] as Double
-                    ),
-                    attrs["elevation"] as Double,
-                    attrs["distance"].toString().toInt()
+
+                // Extract the necessary attributes from the JSON data
+                val title = attrs?.get("title") as String
+                val latitude = positions?.get("lat") as Double
+                val longitude = positions["lng"] as Double
+                val elevation = attrs["elevation"] as Double
+                val distance = attrs["distance"].toString().toInt()
+
+                // Create a GeocodeItem object using the extracted attributes
+                val geocodeItem = GeocodeItem(
+                    title,
+                    Position(latitude, longitude),
+                    elevation,
+                    distance
                 )
-                geocodeItemList.add(geoitem)
+
+                // Add the GeocodeItem to the list
+                geocodeItemList.add(geocodeItem)
             }
         }
 
         return geocodeItemList
     }
-
 
 }

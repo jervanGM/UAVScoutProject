@@ -18,8 +18,13 @@ import androidx.navigation.compose.rememberNavController
 import com.example.uavscoutproject.NavAppbar
 import com.example.uavscoutproject.R
 import com.example.uavscoutproject.navigation.AppScreens
-import com.example.uavscoutproject.navigation.bottomBar
+import com.example.uavscoutproject.navigation.BottomBar
 
+/**
+ * Composable function that represents the Rules screen(TBD).
+ *
+ * @param navController The [NavHostController] used for navigation.
+ */
 @Composable
 fun RuleSetInfoSreen(navController: NavHostController){
     val scaffoldState = rememberScaffoldState()
@@ -34,13 +39,18 @@ fun RuleSetInfoSreen(navController: NavHostController){
                 buttonColor = R.color.back_button_color
             )
         },
-        bottomBar = { bottomBar() },
+        bottomBar = { BottomBar() },
         backgroundColor = MaterialTheme.colorScheme.background
     ){ paddingValues ->
         RuleSetInfo(padding = paddingValues)
     }
 }
 
+/**
+ * Composable function that represents the content of the Rules screen(TBD).
+ *
+ * @param padding The padding values to apply to the content.
+ */
 @Composable
 fun RuleSetInfo(padding: PaddingValues) {
     Column(modifier = Modifier.fillMaxSize()
@@ -52,7 +62,9 @@ fun RuleSetInfo(padding: PaddingValues) {
     }
 }
 
-
+/**
+ * Preview function for the Rules screen(TBD).
+ */
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun RuleSetInfoScreenPreview(){
